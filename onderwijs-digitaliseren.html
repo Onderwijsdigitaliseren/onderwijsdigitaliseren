@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Onderwijs Digitaliseren — werkende onderwijstools.</title>
+<meta name="description" content="Ik bouw AI-gedreven onderwijstools, simulaties en leeromgevingen die direct inzetbaar zijn in de praktijk." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --navy:         #1A2B5F;
+    --navy-deep:    #0F1B3D;
+    --navy-soft:    #2A3D7A;
+    --teal:         #2DA89C;
+    --teal-deep:    #1E8A7E;
+    --teal-light:   #B3E5DE;
+    --teal-bg:      #EEF8F5;
+    --bg:           #FBFAF6;
+    --white:        #FFFFFF;
+    --text:         #1A2B5F;
+    --text-soft:    #4A5578;
+    --text-muted:   #8B95B0;
+    --rule:         rgba(26, 43, 95, 0.10);
+    --rule-strong:  rgba(26, 43, 95, 0.16);
+    --shadow-sm:    0 1px 2px rgba(26,43,95,.05), 0 2px 6px rgba(26,43,95,.04);
+    --shadow-md:    0 4px 14px rgba(26,43,95,.07), 0 12px 32px rgba(26,43,95,.05);
+    --shadow-lg:    0 12px 32px rgba(26,43,95,.10), 0 36px 80px rgba(26,43,95,.12);
+
+    --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+
+    --max:          1340px;
+    --gutter:       clamp(20px, 4vw, 56px);
+    --radius:       16px;
+    --radius-lg:    28px;
+    --radius-pill:  999px;
+  }
+
+  *,*::before,*::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; padding: 0; margin: 0; }
+
+  .container {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  .accent { color: var(--teal-deep); font-style: italic; font-weight: 500; }
+
+  /* ============================================
+     NAV — minimal, sticky
+     ============================================ */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(251, 250, 246, 0.72);
+    transition: border-color 0.3s ease, background 0.3s ease;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.scrolled {
+    border-bottom-color: var(--rule);
+    background: rgba(251, 250, 246, 0.92);
+  }
+  .nav-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 18px var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand img { height: 38px; width: auto; }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(.2,.7,.2,1);
+  }
+  .nav-cta:hover {
+    background: var(--teal-deep);
+    transform: translateY(-1px);
+  }
+  .nav-cta svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
+  .nav-cta:hover svg { transform: translateX(3px); }
+
+  /* ============================================
+     HERO — viewport-filling typography
+     ============================================ */
+  .hero {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 0 80px;
+    overflow: hidden;
+  }
+  .hero-status {
+    position: absolute;
+    top: 100px;
+    right: var(--gutter);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--teal-deep);
+    letter-spacing: 0.02em;
+  }
+  .hero-status .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 4px rgba(45,168,156,.18);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 4px rgba(45,168,156,.18); }
+    50%     { box-shadow: 0 0 0 9px rgba(45,168,156,.05); }
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(60px, 13vw, 220px);
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+    margin: 0 0 48px;
+    color: var(--navy);
+    font-variation-settings: "opsz" 96;
+  }
+  .hero-headline .line-1 { display: block; }
+  .hero-headline .line-2 {
+    display: block;
+    color: var(--teal-deep);
+    font-style: italic;
+    position: relative;
+    padding-left: clamp(20px, 4vw, 80px);
+  }
+  .hero-headline .line-2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: clamp(12px, 2.5vw, 50px);
+    height: 2px;
+    background: var(--teal-deep);
+    transform: translateY(-50%);
+  }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: end;
+    max-width: 980px;
+    margin-top: auto;
+  }
+  @media (max-width: 760px) {
+    .hero-meta { grid-template-columns: 1fr; gap: 28px; }
+  }
+  .hero-lede {
+    font-size: clamp(15.5px, 1.4vw, 18px);
+    line-height: 1.55;
+    color: var(--text-soft);
+    max-width: 38ch;
+    margin: 0;
+  }
+  .hero-lede strong { color: var(--navy); font-weight: 600; }
+
+  .hero-cta-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    font-size: 14.5px;
+    transition: all 0.35s cubic-bezier(.2,.7,.2,1);
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    white-space: nowrap;
+  }
+  .btn svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
+  .btn:hover svg { transform: translateX(4px); }
+  .btn-primary {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+  .btn-primary:hover {
+    background: var(--teal-deep);
+    border-color: var(--teal-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(45,168,156,.25);
+  }
+  .btn-ghost {
+    color: var(--navy);
+    border-color: var(--rule-strong);
+  }
+  .btn-ghost:hover {
+    border-color: var(--navy);
+    background: var(--white);
+    transform: translateY(-2px);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .hero-scroll .line {
+    width: 1px; height: 32px;
+    background: linear-gradient(to bottom, var(--text-muted), transparent);
+    animation: scrollHint 2s ease-in-out infinite;
+  }
+  @keyframes scrollHint {
+    0%,100% { transform: translateY(0); opacity: 1; }
+    50%     { transform: translateY(8px); opacity: 0.4; }
+  }
+  @media (max-width: 760px) { .hero-scroll { display: none; } }
+
+  /* ============================================
+     MARQUEE — kinetic band
+     ============================================ */
+  .marquee {
+    background: var(--navy);
+    color: var(--white);
+    overflow: hidden;
+    padding: 26px 0;
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--navy);
+    position: relative;
+  }
+  .marquee::before, .marquee::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 120px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .marquee::before {
+    left: 0;
+    background: linear-gradient(to right, var(--navy), transparent);
+  }
+  .marquee::after {
+    right: 0;
+    background: linear-gradient(to left, var(--navy), transparent);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 40s linear infinite;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(22px, 2.6vw, 32px);
+    letter-spacing: -0.015em;
+  }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-item {
+    display: flex;
+    align-items: center;
+    padding: 0 36px;
+    white-space: nowrap;
+  }
+  .marquee-item::after {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    background: var(--teal);
+    border-radius: 50%;
+    margin-left: 36px;
+    transform: translateY(-2px);
+  }
+  .marquee-item.italic {
+    font-style: italic;
+    color: var(--teal-light);
+  }
+  @keyframes marqueeScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ============================================
+     EDITORIAL SECTION HEADERS
+     ============================================ */
+  .editorial-section { position: relative; padding: clamp(80px, 12vw, 160px) 0; }
+
+  .editorial-marker {
+    position: absolute;
+    top: clamp(40px, 6vw, 80px);
+    left: var(--gutter);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(140px, 22vw, 360px);
+    line-height: 0.8;
+    color: var(--navy);
+    opacity: 0.04;
+    letter-spacing: -0.06em;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+  }
+
+  .editorial-header {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: clamp(20px, 6vw, 80px);
+    margin-bottom: clamp(48px, 6vw, 80px);
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .editorial-header { grid-template-columns: 1fr; gap: 24px; }
+  }
+  .editorial-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 12px;
+  }
+  .editorial-label::before {
+    content: "";
+    width: 28px;
+    height: 1.5px;
+    background: var(--teal-deep);
+  }
+  .editorial-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(36px, 5.5vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin: 0 0 20px;
+    color: var(--navy);
+    max-width: 14ch;
+    font-variation-settings: "opsz" 88;
+  }
+  .editorial-intro {
+    font-size: clamp(15.5px, 1.3vw, 17.5px);
+    line-height: 1.55;
+    color: var(--text-soft);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  /* ============================================
+     BENTO GRID — clean 2-col with browser-frame previews
+     ============================================ */
+  .bento {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 880px) {
+    .bento { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  .bento-card {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1),
+                border-color 0.3s ease,
+                box-shadow 0.4s ease;
+    color: var(--navy);
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+  }
+  .bento-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--teal);
+    box-shadow: 0 24px 56px rgba(26,43,95,0.10);
+  }
+  .bento-card.feature {
+    grid-column: 1 / -1;
+  }
+
+  /* Frame wrapper (chrome + preview) */
+  .bento-frame {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #F4F3EE;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  .bento-chrome {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, #F7F6F1 0%, #EFEDE6 100%);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .bento-chrome-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .bento-chrome-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: block;
+  }
+  .bento-chrome-dot:nth-child(1) { background: #FF6058; }
+  .bento-chrome-dot:nth-child(2) { background: #FFBD2E; }
+  .bento-chrome-dot:nth-child(3) { background: #28CA42; }
+  .bento-chrome-url {
+    font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    text-align: center;
+    max-width: 340px;
+    margin: 0 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .bento-chrome-spacer {
+    width: 47px;
+    height: 1px;
+  }
+
+  /* TAG (LIVE badge etc) */
+  .bento-tag {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: var(--radius-pill);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 6px 18px rgba(26,43,95,0.25);
+    z-index: 5;
+  }
+  .bento-tag.live::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 3px rgba(45,168,156,.4);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  /* PREVIEW (inside frame) */
+  .bento-preview {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #FAFAF8;
+    aspect-ratio: 16 / 10;
+  }
+  .bento-card.feature .bento-preview {
+    aspect-ratio: 21 / 9;
+  }
+  .bento-preview iframe {
+    border: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1440px;
+    height: 900px;
+    pointer-events: none;
+    user-select: none;
+    transform-origin: 0 0;
+    display: block;
+    background: var(--white);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .bento-preview iframe.loaded {
+    opacity: 1;
+  }
+
+  /* Shimmer while loading */
+  .bento-preview::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(110deg,
+      transparent 30%,
+      rgba(255,255,255,0.45) 50%,
+      transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s linear infinite;
+    opacity: 0.55;
+    transition: opacity 0.3s ease;
+  }
+  .bento-preview:has(iframe.loaded)::before {
+    opacity: 0;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* CONTENT below frame */
+  .bento-content {
+    padding: 6px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bento-card.feature .bento-content {
+    padding: 10px 22px 14px;
+  }
+  .bento-kind {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--teal-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+  }
+  .bento-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(20px, 1.8vw, 26px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--navy);
+  }
+  .bento-card.feature .bento-title {
+    font-size: clamp(26px, 2.6vw, 38px);
+    margin-bottom: 4px;
+  }
+  .bento-desc {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-soft);
+    margin: 4px 0 0;
+    max-width: 52ch;
+  }
+  .bento-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--teal-deep);
+    letter-spacing: 0.01em;
+    margin-top: 10px;
+  }
+  .bento-link::after {
+    content: "→";
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+  .bento-card:hover .bento-link::after {
+    transform: translateX(6px);
+  }
+
+    /* ============================================
+     PULL QUOTE — breathing space
+     ============================================ */
+  .pull-quote {
+    padding: clamp(100px, 14vw, 180px) 0;
+    position: relative;
+    text-align: center;
+  }
+  .pull-quote-mark {
+    font-family: var(--font-display);
+    font-size: clamp(120px, 18vw, 280px);
+    line-height: 0.5;
+    color: var(--teal);
+    opacity: 0.18;
+    margin: 0 0 -20px;
+    user-select: none;
+    font-style: italic;
+  }
+  .pull-quote-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(28px, 4.6vw, 64px);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: var(--navy);
+    margin: 0 auto;
+    max-width: 20ch;
+    font-variation-settings: "opsz" 72;
+  }
+  .pull-quote-text .accent {
+    color: var(--teal-deep);
+    position: relative;
+    white-space: nowrap;
+  }
+  .pull-quote-text .accent::after {
+    content: "";
+    position: absolute;
+    left: -1%;
+    right: -1%;
+    bottom: 0.1em;
+    height: 0.18em;
+    background: var(--teal);
+    opacity: 0.25;
+    border-radius: 2px;
+    z-index: -1;
+  }
+  .pull-quote-cite {
+    margin: clamp(28px, 4vw, 44px) 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ============================================
+     INLINE TRAININGEN — secondary, subtle
+     ============================================ */
+  .trainingen {
+    padding: clamp(60px, 8vw, 100px) 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .trainingen-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: clamp(24px, 6vw, 80px);
+    align-items: start;
+  }
+  @media (max-width: 760px) { .trainingen-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .trainingen-aside {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .trainingen-aside::before {
+    content: "";
+    width: 28px;
+    height: 1.5px;
+    background: var(--teal-deep);
+  }
+  .trainingen-text {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(22px, 2.6vw, 32px);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+    margin: 0 0 24px;
+    max-width: 24ch;
+  }
+  .trainingen-text .accent {
+    color: var(--teal-deep);
+    font-style: italic;
+  }
+  .trainingen-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pill-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: var(--white);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-pill);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--navy);
+    transition: all 0.3s ease;
+  }
+  .pill-link:hover {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
+  .pill-link svg { width: 14px; height: 14px; transition: transform 0.3s ease; }
+  .pill-link:hover svg { transform: translateX(3px); }
+
+  /* ============================================
+     SIGNATURE — wie ik ben as a moment
+     ============================================ */
+  .signature {
+    padding: clamp(80px, 10vw, 140px) 0;
+    text-align: center;
+  }
+  .signature-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    margin: 0 0 28px;
+  }
+  .signature-text {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.5;
+    letter-spacing: -0.015em;
+    color: var(--navy);
+    max-width: 32ch;
+    margin: 0 auto;
+  }
+  .signature-text strong {
+    font-weight: 600;
+    color: var(--teal-deep);
+    font-style: italic;
+  }
+
+  /* ============================================
+     FINALE — oversized contact statement
+     ============================================ */
+  .finale {
+    padding: clamp(120px, 18vw, 220px) 0 clamp(60px, 8vw, 100px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .finale::before {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(45,168,156,.10), transparent 65%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .finale-inner {
+    position: relative;
+    z-index: 1;
+  }
+  .finale-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    background: var(--teal-bg);
+    color: var(--teal-deep);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .finale-eyebrow .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 3px rgba(45,168,156,.2);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .finale-headline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(52px, 11vw, 180px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    margin: 0 0 56px;
+    color: var(--navy);
+    font-variation-settings: "opsz" 96;
+  }
+  .finale-headline .accent {
+    color: var(--teal-deep);
+    font-style: italic;
+  }
+  .finale-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .finale-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 40px;
+    background: var(--navy);
+    color: var(--white);
+    border-radius: var(--radius-pill);
+    font-size: clamp(15px, 1.4vw, 17px);
+    font-weight: 600;
+    transition: all 0.4s cubic-bezier(.2,.7,.2,1);
+    box-shadow: 0 12px 28px rgba(26,43,95,.18);
+  }
+  .finale-cta:hover {
+    background: var(--teal-deep);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 38px rgba(45,168,156,.35);
+  }
+  .finale-cta svg { width: 18px; height: 18px; transition: transform 0.3s ease; }
+  .finale-cta:hover svg { transform: translateX(5px); }
+  .finale-socials {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .finale-social {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    display: grid; place-items: center;
+    color: var(--navy);
+    transition: all 0.3s ease;
+  }
+  .finale-social:hover {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--white);
+    transform: translateY(-3px);
+  }
+  .finale-social svg { width: 16px; height: 16px; }
+
+  /* ============================================
+     FOOTER — minimal closing
+     ============================================ */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 32px 0;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .footer-brand img { height: 28px; opacity: 0.7; }
+  .footer-tagline {
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--teal-deep);
+    font-weight: 500;
+  }
+
+  /* ============================================
+     REVEAL ANIMATIONS
+     ============================================ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s cubic-bezier(.2,.7,.2,1), transform 0.9s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal.d1 { transition-delay: 0.05s; }
+  .reveal.d2 { transition-delay: 0.12s; }
+  .reveal.d3 { transition-delay: 0.2s; }
+  .reveal.d4 { transition-delay: 0.28s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .marquee-track, .hero-status .pulse, .finale-eyebrow .dot { animation: none; }
+    .hero-scroll .line { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====================== NAV ====================== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#home" class="brand">
+      <img src="logo.png" alt="Onderwijs Digitaliseren" />
+    </a>
+    <a href="#contact" class="nav-cta">
+      Praat met me
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</nav>
+
+<!-- ====================== HERO ====================== -->
+<section class="hero" id="home">
+  <div class="container">
+
+    <div class="hero-status reveal d1">
+      <span class="pulse"></span>
+      Beschikbaar voor nieuwe projecten
+    </div>
+
+    <h1 class="hero-headline reveal d2">
+      <span class="line-1">Werkende</span>
+      <span class="line-2">onderwijstools.</span>
+    </h1>
+
+    <div class="hero-meta">
+      <p class="hero-lede reveal d3">
+        Ik bouw maatwerk <strong>AI-tools, simulaties en interactieve leeromgevingen</strong> voor het onderwijs. Klein, snel, direct inzetbaar in de praktijk.
+      </p>
+      <div class="hero-cta-group reveal d4">
+        <a href="#voorbeelden" class="btn btn-primary">
+          Bekijk voorbeelden
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#contact" class="btn btn-ghost">
+          Praat met me
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<!-- ====================== MARQUEE ====================== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">AI-gedreven</span>
+    <span class="marquee-item italic">simulaties</span>
+    <span class="marquee-item">oefenomgevingen</span>
+    <span class="marquee-item italic">maatwerk</span>
+    <span class="marquee-item">interactief</span>
+    <span class="marquee-item italic">leercoaches</span>
+    <span class="marquee-item">toetsgenerator</span>
+    <span class="marquee-item italic">direct bruikbaar</span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item">AI-gedreven</span>
+    <span class="marquee-item italic">simulaties</span>
+    <span class="marquee-item">oefenomgevingen</span>
+    <span class="marquee-item italic">maatwerk</span>
+    <span class="marquee-item">interactief</span>
+    <span class="marquee-item italic">leercoaches</span>
+    <span class="marquee-item">toetsgenerator</span>
+    <span class="marquee-item italic">direct bruikbaar</span>
+  </div>
+</div>
+
+<!-- ====================== VOORBEELDEN (bento) ====================== -->
+<section class="editorial-section" id="voorbeelden">
+  <div class="editorial-marker">01</div>
+  <div class="container">
+
+    <header class="editorial-header reveal">
+      <div class="editorial-label">Voorbeelden</div>
+      <div>
+        <h2 class="editorial-title">Wat ik <span class="accent">bouw.</span></h2>
+        <p class="editorial-intro">Echte tools die digitaal zijn en helpen. Klik er op, ervaar ze, en zie meteen wat ze doen.</p>
+      </div>
+    </header>
+
+    <div class="bento">
+
+      <a href="voorbeelden/praktijksimulatie.html" class="bento-card feature reveal d1">
+        <span class="bento-tag live">Live demo</span>
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/praktijksimulatie</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/praktijksimulatie.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">Praktijksimulatie</div>
+          <h3 class="bento-title">Hoe reageer jij op deze situatie?</h3>
+          <p class="bento-desc">Interactieve mini-case met realistische keuzes en directe feedback op basis van didactisch onderzoek. Probeer hem nu — duurt twee minuten.</p>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+      <a href="voorbeelden/ai-leercoach.html" class="bento-card reveal">
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/ai-leercoach</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/ai-leercoach.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">AI Leercoach</div>
+          <h3 class="bento-title">Een coach die luistert en oefent</h3>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+      <a href="voorbeelden/duurzaamheidsradar.html" class="bento-card reveal">
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/duurzaamheidsradar</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/duurzaamheidsradar.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">Duurzaamheidsradar</div>
+          <h3 class="bento-title">Inzicht in eigen impact</h3>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+      <a href="voorbeelden/studievaardigheden-scan.html" class="bento-card reveal">
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/studievaardigheden-scan</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/studievaardigheden-scan.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">Studievaardigheden Scan</div>
+          <h3 class="bento-title">Hoe iemand leert</h3>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+      <a href="voorbeelden/ai-toetsgenerator.html" class="bento-card reveal">
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/ai-toetsgenerator</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/ai-toetsgenerator.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">AI Toetsgenerator</div>
+          <h3 class="bento-title">Van stof naar toets in minuten</h3>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+      <a href="voorbeelden/adaptieve-oefenomgeving.html" class="bento-card feature reveal d1">
+        <div class="bento-frame">
+          <div class="bento-chrome">
+            <div class="bento-chrome-dots">
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+              <span class="bento-chrome-dot"></span>
+            </div>
+            <div class="bento-chrome-url">onderwijsdigitaliseren.nl/adaptieve-oefenomgeving</div>
+            <div class="bento-chrome-spacer"></div>
+          </div>
+          <div class="bento-preview">
+            <iframe src="voorbeelden/adaptieve-oefenomgeving.html" loading="lazy" tabindex="-1" aria-hidden="true" sandbox="allow-scripts allow-same-origin" title=""></iframe>
+          </div>
+        </div>
+        <div class="bento-content">
+          <div class="bento-kind">Adaptieve Oefenomgeving</div>
+          <h3 class="bento-title">Oefeningen die meebewegen</h3>
+          <p class="bento-desc">Een speelse oefenomgeving waarin het niveau zich aanpast aan de gebruiker. Goed antwoord, lastiger. Fout antwoord, terug naar de basis. Klein en verslavend.</p>
+          <span class="bento-link">Probeer hem</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====================== PULL QUOTE ====================== -->
+<section class="pull-quote">
+  <div class="container">
+    <div class="reveal">
+      <div class="pull-quote-mark">"</div>
+      <p class="pull-quote-text">
+        Ik bouw. Jij toetst <span class="accent">inhoudelijk.</span><br>
+        Samen sneller dan alleen.
+      </p>
+      <p class="pull-quote-cite">— Hoe ik werk</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== INLINE TRAININGEN ====================== -->
+<section class="trainingen">
+  <div class="container">
+    <div class="trainingen-grid reveal">
+      <div class="trainingen-aside">02 / Trainingen &amp; hulp</div>
+      <div>
+        <p class="trainingen-text">
+          Liever zelf leren? <span class="accent">Ook prima.</span> Concrete hulp bij wat je morgen wilt gebruiken — geen losse theorieblokken.
+        </p>
+        <div class="trainingen-links">
+          <a href="https://wa.me/31645646346?text=Hoi%2C%20ik%20heb%20een%20vraag%20over%20AI%20of%20digitalisering." target="_blank" rel="noopener" class="pill-link">
+            Stel je vraag
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20een%20training%20of%20workshop%20plannen." target="_blank" rel="noopener" class="pill-link">
+            Plan een sessie
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== SIGNATURE ====================== -->
+<section class="signature">
+  <div class="container">
+    <div class="reveal">
+      <p class="signature-eyebrow">03 / Wie ik ben</p>
+      <p class="signature-text">
+        Ik ben docent met affiniteit en ervaring in digitalisering binnen het onderwijs. <strong>Aanpakker, doener en gericht.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FINALE ====================== -->
+<section class="finale" id="contact">
+  <div class="container">
+    <div class="finale-inner reveal">
+      <div class="finale-eyebrow">
+        <span class="dot"></span>
+        Laten we beginnen
+      </div>
+      <h2 class="finale-headline">
+        Welke tool wil jij <span class="accent">gisteren</span> al?
+      </h2>
+      <div class="finale-actions">
+        <a href="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20een%20tool%20laten%20maken." target="_blank" rel="noopener" class="finale-cta">
+          App me — vertel je idee
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <div class="finale-socials">
+          <a href="https://m.me/61590281861295" target="_blank" rel="noopener" class="finale-social" aria-label="Messenger">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.652V24l4.086-2.244c1.09.301 2.246.466 3.445.466 6.627 0 12-4.974 12-11.111S18.627 0 12 0zm1.193 14.963l-3.056-3.259-5.963 3.259L10.733 8l3.13 3.259L19.752 8l-6.559 6.963z"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/company/onderwijsdigitaliseren/" target="_blank" rel="noopener" class="finale-social" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/onderwijsdigitaliseren/" target="_blank" rel="noopener" class="finale-social" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61590281861295" target="_blank" rel="noopener" class="finale-social" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FOOTER ====================== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Onderwijs Digitaliseren" />
+        <span>© 2026 · KvK 69479887</span>
+      </div>
+      <span class="footer-tagline">Klein, snel en uitvoerend.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // NAV scroll behaviour
+  const nav = document.getElementById('nav');
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }, { passive: true });
+
+  // REVEAL on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -80px 0px' });
+    revealEls.forEach(el => observer.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('visible'));
+  }
+
+  // BENTO PREVIEW IFRAME SCALING
+  // Each iframe renders at 1440px wide; we scale it to fit the card width.
+  const RENDER_WIDTH = 1440;
+  const previewWrappers = document.querySelectorAll('.bento-preview');
+
+  function scaleIframe(wrapper) {
+    const iframe = wrapper.querySelector('iframe');
+    if (!iframe) return;
+    const width = wrapper.getBoundingClientRect().width;
+    if (width === 0) return;
+    const scale = width / RENDER_WIDTH;
+    iframe.style.transform = `scale(${scale})`;
+  }
+
+  function scaleAllIframes() {
+    previewWrappers.forEach(scaleIframe);
+  }
+
+  // Mark iframes as loaded for fade-in
+  previewWrappers.forEach(wrapper => {
+    const iframe = wrapper.querySelector('iframe');
+    if (!iframe) return;
+    iframe.addEventListener('load', () => {
+      iframe.classList.add('loaded');
+    });
+  });
+
+  // Initial scale + on resize + via ResizeObserver for accuracy
+  scaleAllIframes();
+  window.addEventListener('resize', scaleAllIframes);
+  window.addEventListener('load', scaleAllIframes);
+
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(entries => {
+      entries.forEach(entry => scaleIframe(entry.target));
+    });
+    previewWrappers.forEach(w => ro.observe(w));
+  }
+</script>
+
+</body>
+</html>

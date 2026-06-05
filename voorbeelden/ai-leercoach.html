@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Leercoach — Onderwijs Digitaliseren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1F8;
+    --surface:#FFFFFF;
+    --ink:#141C32;
+    --ink-soft:#46536E;
+    --muted:#8492A8;
+    --border:#E2E7F0;
+    --border-strong:#CCD4E2;
+    --primary:#3D4FC4;
+    --primary-hover:#2F3DA0;
+    --primary-soft:#EAEDFB;
+    --primary-tint:#F4F6FE;
+    --teal:#1597A6;
+    --success:#138A5E;
+    --success-soft:#E3F4ED;
+    --attention:#B26A1A;
+    --attention-soft:#FBF0E1;
+    --ring:rgba(61,79,196,.4);
+    --shadow-sm:0 1px 2px rgba(20,28,50,.06),0 1px 3px rgba(20,28,50,.05);
+    --shadow-md:0 6px 24px -10px rgba(20,28,50,.20);
+    --shadow-lg:0 24px 60px -28px rgba(20,28,50,.40);
+    --r-sm:10px;--r-md:15px;--r-lg:22px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink);min-height:100vh;line-height:1.58;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(60% 55% at 88% -5%, #E4E9FF 0%, transparent 60%),
+      radial-gradient(55% 45% at -5% 12%, #DEF3EE 0%, transparent 55%),
+      radial-gradient(50% 50% at 50% 110%, #E7E2FA 0%, transparent 60%),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  a{color:inherit;}
+  :focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:6px;}
+
+  /* ---------- Header ---------- */
+  header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.82);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;padding:12px clamp(16px,5vw,40px);}
+  .back{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink-soft);
+    font-weight:600;font-size:.9rem;padding:8px 14px 8px 10px;border-radius:8px;transition:.15s;}
+  .back:hover{background:var(--primary-soft);color:var(--primary);}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:.92rem;}
+  .brand img{height:26px;width:auto;display:block;}
+  .sound-toggle{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);font-size:.82rem;font-weight:600;font-family:inherit;padding:7px 12px;border-radius:8px;cursor:pointer;transition:.15s;}
+  .sound-toggle:hover{border-color:var(--border-strong);color:var(--ink);}
+  .sound-toggle svg{width:16px;height:16px;}
+
+  /* ---------- Stepper ---------- */
+  .stepper-wrap{background:rgba(255,255,255,.6);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);}
+  .stepper{max-width:780px;margin:0 auto;display:flex;align-items:center;padding:14px clamp(16px,5vw,32px);gap:6px;}
+  .step{display:flex;align-items:center;gap:9px;flex:0 0 auto;}
+  .step .dot{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:.78rem;font-weight:700;
+    background:var(--surface);color:var(--muted);border:1.5px solid var(--border-strong);transition:.3s;}
+  .step .dot svg{width:14px;height:14px;}
+  .step .lbl{font-size:.85rem;font-weight:600;color:var(--muted);transition:.3s;white-space:nowrap;}
+  .step.done .dot{background:var(--success);border-color:var(--success);color:#fff;}
+  .step.active .dot{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 0 0 4px var(--primary-soft);}
+  .step.active .lbl{color:var(--primary);}
+  .step.done .lbl{color:var(--ink-soft);}
+  .connector{flex:1 1 auto;height:2px;background:var(--border-strong);border-radius:2px;min-width:12px;transition:.4s;}
+  .connector.done{background:var(--success);}
+  @media (max-width:620px){.step .lbl{display:none;} .step.active .lbl{display:inline;}}
+
+  /* ---------- Main ---------- */
+  main{max-width:780px;margin:0 auto;padding:26px clamp(16px,5vw,32px) 70px;}
+
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+    box-shadow:var(--shadow-lg);overflow:hidden;position:relative;}
+  .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--primary),var(--teal));}
+
+  .panel-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#FBFCFF,#FFFFFF);}
+  .av{position:relative;flex:0 0 auto;}
+  .av .circle{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;
+    font-weight:700;font-size:1.18rem;background:linear-gradient(140deg,#5566DB,#3A47A8);box-shadow:var(--shadow-sm);}
+  .av .online{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;
+    background:var(--success);border:2.5px solid #fff;}
+  .coach-meta h1{font-size:1.08rem;font-weight:700;letter-spacing:-.01em;}
+  .coach-meta .role{font-size:.84rem;color:var(--ink-soft);}
+  .coach-meta .role b{color:var(--success);font-weight:600;}
+
+  /* ---------- Chat ---------- */
+  .chat{padding:20px 24px 8px;display:flex;flex-direction:column;gap:13px;}
+  .daydiv{align-self:center;font-size:.74rem;font-weight:600;color:var(--muted);background:var(--bg);
+    border:1px solid var(--border);padding:4px 12px;border-radius:100px;margin:2px 0 6px;}
+  .row{display:flex;gap:11px;max-width:100%;}
+  .row.user{justify-content:flex-end;}
+  .mini{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+    font-weight:700;font-size:.78rem;background:linear-gradient(140deg,#5566DB,#3A47A8);margin-top:2px;}
+  .stack{display:flex;flex-direction:column;gap:3px;max-width:80%;}
+  .stack.end{align-items:flex-end;margin-left:auto;}
+  .bubble{font-size:1rem;border-radius:var(--r-md);padding:13px 16px;}
+  .bubble.coach{background:var(--primary-tint);border:1px solid var(--border);color:var(--ink);border-top-left-radius:5px;}
+  .bubble.user{background:var(--primary);color:#fff;border-top-right-radius:5px;font-weight:500;}
+  .bubble strong{font-weight:700;}
+  .bubble.coach strong{color:var(--primary-hover);}
+  .bubble .viz{margin-top:12px;}
+  .time{font-size:.7rem;color:var(--muted);padding:0 5px;}
+  .anim-in{animation:rise .4s cubic-bezier(.22,.61,.36,1) both;}
+  @keyframes rise{from{opacity:0;transform:translateY(9px);}to{opacity:1;transform:translateY(0);}}
+
+  .typing{display:inline-flex;gap:5px;padding:15px 16px;background:var(--primary-tint);border:1px solid var(--border);
+    border-radius:var(--r-md);border-top-left-radius:5px;}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bob 1.2s infinite ease-in-out;}
+  .typing i:nth-child(2){animation-delay:.15s;}
+  .typing i:nth-child(3){animation-delay:.3s;}
+  @keyframes bob{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
+
+  /* ---------- Fraction visual ---------- */
+  .fracviz{display:flex;flex-direction:column;gap:7px;}
+  .frac-row{display:flex;align-items:center;gap:11px;}
+  .frac-label{font-size:.84rem;font-weight:700;color:var(--ink-soft);min-width:34px;text-align:right;font-variant-numeric:tabular-nums;}
+  .frac-bar{display:flex;gap:3px;flex:1;max-width:250px;}
+  .frac-seg{height:24px;flex:1;border-radius:5px;background:#E6EAF3;border:1px solid var(--border);}
+  .frac-seg.fill{background:var(--primary);border-color:var(--primary);}
+  .frac-seg.fill.green{background:var(--success);border-color:var(--success);}
+
+  /* ---------- Dock ---------- */
+  .dock{padding:10px 24px 22px;border-top:1px solid var(--border);background:#FCFDFF;}
+  .dock-hint{font-size:.8rem;color:var(--muted);margin:6px 2px 12px;}
+  .options{display:flex;flex-wrap:wrap;gap:10px;}
+  .opt{font-family:inherit;font-size:.95rem;font-weight:600;cursor:pointer;text-align:left;
+    padding:12px 18px;border-radius:11px;border:1.5px solid var(--border-strong);background:var(--surface);
+    color:var(--ink);transition:border-color .15s,background .15s,transform .1s,color .15s;}
+  .opt:hover{border-color:var(--primary);background:var(--primary-tint);}
+  .opt:active{transform:translateY(1px);}
+  .opt.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .opt.primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);}
+  .opt.correct{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+  .opt.wrong{background:var(--attention-soft);border-color:var(--attention);color:var(--attention);}
+  .opt[disabled]{cursor:default;}
+  .opt[disabled]:not(.correct):not(.wrong){opacity:.45;}
+  .quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media (max-width:480px){.quiz-grid{grid-template-columns:1fr;}}
+  .quiz-grid .opt{text-align:center;}
+  .input-row{display:flex;gap:9px;}
+  .input-row input{flex:1;font-family:inherit;font-size:1rem;padding:13px 16px;border-radius:11px;
+    border:1.5px solid var(--border-strong);background:var(--surface);color:var(--ink);}
+  .input-row input::placeholder{color:var(--muted);}
+  .input-row input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft);}
+  .send{border:none;cursor:pointer;background:var(--primary);color:#fff;border-radius:11px;padding:0 18px;
+    font-family:inherit;font-weight:600;font-size:.95rem;display:inline-flex;align-items:center;gap:7px;}
+  .send:hover{background:var(--primary-hover);}
+  .send svg{width:17px;height:17px;}
+
+  /* ---------- Summary ---------- */
+  .summary{padding:8px 24px 26px;}
+  .sum-head{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
+  .ring-wrap{position:relative;flex:0 0 auto;width:96px;height:96px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{stroke:var(--border);}
+  .ring-fg{stroke:url(#grad);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.22,.61,.36,1);}
+  .ring-text{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:1.35rem;color:var(--ink);}
+  .sum-title h2{font-size:1.34rem;font-weight:800;letter-spacing:-.01em;margin-bottom:3px;}
+  .sum-title p{color:var(--ink-soft);font-size:.96rem;}
+  .skills{display:flex;flex-direction:column;gap:9px;margin-bottom:22px;}
+  .skill{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--border);border-radius:13px;background:#FCFDFF;}
+  .skill .ic{width:28px;height:28px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;}
+  .skill.ok .ic{background:var(--success-soft);color:var(--success);}
+  .skill.gap .ic{background:var(--attention-soft);color:var(--attention);}
+  .skill .ic svg{width:16px;height:16px;}
+  .skill .txt{flex:1;}
+  .skill .txt .name{font-weight:600;font-size:.95rem;}
+  .skill .txt .tag{font-size:.8rem;}
+  .skill.ok .tag{color:var(--success);}
+  .skill.gap .tag{color:var(--attention);}
+  .plan{background:var(--primary-tint);border:1px solid var(--border);border-radius:15px;padding:18px 20px;}
+  .plan h3{font-size:.76rem;text-transform:uppercase;letter-spacing:.09em;color:var(--primary);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+  .plan h3 svg{width:15px;height:15px;}
+  .plan ol{margin:0;padding-left:20px;}
+  .plan li{margin-bottom:8px;font-size:.95rem;}
+  .plan li:last-child{margin-bottom:0;}
+  .plan li strong{color:var(--primary-hover);}
+
+  /* ---------- CTA ---------- */
+  .cta{margin-top:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+    box-shadow:var(--shadow-md);padding:24px clamp(20px,4vw,30px);display:flex;align-items:center;justify-content:space-between;
+    gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;}
+  .cta::before{content:"";position:absolute;inset:0 0 auto auto;width:200px;height:200px;
+    background:radial-gradient(circle at top right, var(--primary-soft), transparent 70%);pointer-events:none;}
+  .cta .ct{flex:1;min-width:220px;position:relative;}
+  .cta h3{font-size:1.1rem;font-weight:700;margin-bottom:3px;}
+  .cta p{color:var(--ink-soft);font-size:.92rem;}
+  .wa{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:.95rem;
+    padding:13px 22px;border-radius:11px;color:#fff;background:#1FA855;white-space:nowrap;transition:.15s;position:relative;}
+  .wa:hover{background:#188943;}
+  .wa:active{transform:translateY(1px);}
+  .wa svg{width:20px;height:20px;}
+
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="../onderwijs-digitaliseren.html#voorbeelden">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    Terug
+  </a>
+  <div class="brand">
+    <img src="../logo.png" alt="" onerror="this.remove()">
+    <span>Onderwijs Digitaliseren</span>
+  </div>
+  <button class="sound-toggle" id="soundToggle" aria-pressed="false">
+    <svg id="icoOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+    <svg id="icoOn" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M19 5a9 9 0 010 14"/></svg>
+    <span id="soundLabel">Geluid uit</span>
+  </button>
+</header>
+
+<div class="stepper-wrap">
+  <div class="stepper" id="stepper" role="list" aria-label="Voortgang van het gesprek">
+    <div class="step active" data-step="1" role="listitem"><span class="dot">1</span><span class="lbl">Kennismaken</span></div>
+    <div class="connector"></div>
+    <div class="step" data-step="2" role="listitem"><span class="dot">2</span><span class="lbl">Verkennen</span></div>
+    <div class="connector"></div>
+    <div class="step" data-step="3" role="listitem"><span class="dot">3</span><span class="lbl">Oefenen</span></div>
+    <div class="connector"></div>
+    <div class="step" data-step="4" role="listitem"><span class="dot">4</span><span class="lbl">Jouw plan</span></div>
+  </div>
+</div>
+
+<main>
+  <div class="panel">
+    <div class="panel-head">
+      <div class="av">
+        <div class="circle" aria-hidden="true">S</div>
+        <span class="online" aria-hidden="true"></span>
+      </div>
+      <div class="coach-meta">
+        <h1>Sanne — je leercoach</h1>
+        <div class="role">Rekenen &amp; taal · <b>nu beschikbaar</b></div>
+      </div>
+    </div>
+    <div class="chat" id="chat" aria-live="polite" aria-label="Gesprek met je leercoach">
+      <div class="daydiv">Vandaag</div>
+    </div>
+    <div class="dock" id="dock"></div>
+  </div>
+  <div id="endZone"></div>
+</main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D4FC4"/><stop offset="1" stop-color="#1597A6"/></linearGradient>
+</defs></svg>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const chat=$('chat'),dock=$('dock'),endZone=$('endZone'),stepper=$('stepper');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const escapeHtml=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nowTime=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+
+function setStep(n){
+  stepper.querySelectorAll('.step').forEach(s=>{const v=+s.dataset.step;
+    s.classList.toggle('active',v===n);s.classList.toggle('done',v<n);
+    if(v<n)s.querySelector('.dot').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  });
+  stepper.querySelectorAll('.connector').forEach((c,i)=>c.classList.toggle('done',i<n-1));
+}
+
+function scrollDown(){requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}));}
+function addUser(text){
+  const row=document.createElement('div');row.className='row user';
+  row.innerHTML=`<div class="stack end"><div class="bubble user anim-in">${text}</div><span class="time">${nowTime()}</span></div>`;
+  chat.appendChild(row);play('user');scrollDown();
+}
+function showTyping(){
+  const row=document.createElement('div');row.className='row coach';
+  row.innerHTML=`<div class="mini" aria-hidden="true">S</div><div class="typing" role="status" aria-label="Sanne typt…"><i></i><i></i><i></i></div>`;
+  chat.appendChild(row);scrollDown();return row;
+}
+function addCoach(html){
+  const row=document.createElement('div');row.className='row coach';
+  row.innerHTML=`<div class="mini" aria-hidden="true">S</div><div class="stack"><div class="bubble coach anim-in">${html}</div><span class="time">${nowTime()}</span></div>`;
+  chat.appendChild(row);play('msg');scrollDown();
+}
+async function says(lines){
+  for(const line of lines){
+    const t=showTyping();
+    const plain=line.replace(/<[^>]+>/g,'');
+    await wait(Math.min(1500,560+plain.length*16));
+    t.remove();addCoach(line);
+    await wait(360);
+  }
+}
+
+/* controls */
+function clearDock(){dock.innerHTML='';}
+function options(opts,hint){
+  clearDock();
+  if(hint){const h=document.createElement('p');h.className='dock-hint';h.textContent=hint;dock.appendChild(h);}
+  const wrap=document.createElement('div');wrap.className='options';
+  opts.forEach(o=>{const b=document.createElement('button');b.className='opt'+(o.primary?' primary':'');
+    b.textContent=o.label;b.addEventListener('click',()=>{addUser(o.label);clearDock();o.action();});wrap.appendChild(b);});
+  dock.appendChild(wrap);const f=wrap.querySelector('button');if(f)f.focus();
+}
+function textInput(ph,onSubmit,hint){
+  clearDock();
+  if(hint){const h=document.createElement('p');h.className='dock-hint';h.textContent=hint;dock.appendChild(h);}
+  const wrap=document.createElement('div');wrap.className='input-row';
+  const inp=document.createElement('input');inp.type='text';inp.placeholder=ph;inp.maxLength=140;inp.setAttribute('aria-label',ph);
+  const btn=document.createElement('button');btn.className='send';
+  btn.innerHTML='Verstuur <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+  const submit=()=>{const v=inp.value.trim();if(!v)return;addUser(escapeHtml(v));clearDock();onSubmit(v);};
+  btn.addEventListener('click',submit);inp.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+  wrap.append(inp,btn);dock.appendChild(wrap);setTimeout(()=>inp.focus(),150);
+}
+
+/* fraction visual */
+function bar(d,n,green){let s='';for(let i=0;i<d;i++)s+=`<div class="frac-seg${i<n?' fill'+(green?' green':''):''}"></div>`;return `<div class="frac-bar" role="img" aria-label="${n} van ${d}">${s}</div>`;}
+function fracViz(rows){let h='<div class="fracviz">';rows.forEach(r=>{h+=`<div class="frac-row"><span class="frac-label">${r.label}</span>${bar(r.d,r.n,r.green)}</div>`;});return h+'</div>';}
+
+/* sound */
+let soundOn=false,actx=null;
+function play(kind){if(!soundOn)return;try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
+  if(actx.state==='suspended')actx.resume();
+  const map={msg:[587],user:[440],good:[523,784],gentle:[392]};const f=map[kind]||[523];const t0=actx.currentTime;
+  f.forEach((hz,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=hz;const s=t0+i*.05;
+    g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.025,s+.03);g.gain.exponentialRampToValueAtTime(.0001,s+.32);
+    o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+.36);});}
+$('soundToggle').addEventListener('click',function(){soundOn=!soundOn;this.setAttribute('aria-pressed',String(soundOn));
+  $('icoOn').classList.toggle('hidden',!soundOn);$('icoOff').classList.toggle('hidden',soundOn);
+  $('soundLabel').textContent=soundOn?'Geluid aan':'Geluid uit';if(soundOn)play('msg');});
+
+/* ============================================================
+   GESPREK
+   ============================================================ */
+const hour=new Date().getHours();
+const greeting=(hour>=18||hour<6)?"Goedenavond! Wat fijn dat je er bent."
+  :(hour<12)?"Goedemorgen! Fijn dat je de tijd neemt om langs te komen."
+  :"Hoi! Fijn dat je er bent.";
+
+let name="";
+let topic="leren";
+const skills=[
+  {name:"Breuken optellen",ok:null},
+  {name:"Breuken vergelijken",ok:null},
+  {name:"Deel van een getal",ok:null},
+  {name:"Breuk naar kommagetal",ok:null},
+];
+const quiz=[
+  {q:"Wat is 1/2 + 1/4?",options:["1/6","2/6","3/4","1/4"],correct:2,
+   ok:"Je maakte de noemers gelijk: 1/2 is hetzelfde als 2/4, en dan 2/4 + 1/4 = <strong>3/4</strong>. Precies goed.",
+   no:"Niet erg — dit is dé klassieke valkuil. De truc: maak eerst de noemers gelijk. 1/2 is hetzelfde als 2/4, en dan 2/4 + 1/4 = <strong>3/4</strong>.",
+   viz:fracViz([{label:"1/2",d:4,n:2},{label:"1/4",d:4,n:1},{label:"3/4",d:4,n:3,green:true}])},
+  {q:"Welke breuk is groter: 2/3 of 3/5?",options:["2/3","3/5","Even groot"],correct:0,
+   ok:"Klopt helemaal. Reken je ze om, dan zie je het: 2/3 ≈ 0,67 en 3/5 = 0,6. Dus <strong>2/3</strong> wint.",
+   no:"Goed dat je het probeerde. Even omrekenen helpt hier: 2/3 ≈ 0,67 en 3/5 = 0,6. Daarmee is <strong>2/3</strong> net iets groter.",
+   viz:fracViz([{label:"2/3",d:3,n:2},{label:"3/5",d:5,n:3}])},
+  {q:"Hoeveel is 1/2 van 8?",options:["2","4","6","16"],correct:1,
+   ok:"Precies. 'De helft van' betekent: delen door 2. Dus 8 : 2 = <strong>4</strong>.",
+   no:"Bijna. Onthoud: 'de helft van' betekent delen door 2. Dus 8 : 2 = <strong>4</strong>."},
+  {q:"Wat is 3/4 als kommagetal?",options:["0,25","0,5","0,75","1,33"],correct:2,
+   ok:"Helemaal goed. Je deelt gewoon de teller door de noemer: 3 : 4 = <strong>0,75</strong>.",
+   no:"Net niet. De manier: deel de teller door de noemer, dus 3 : 4 = <strong>0,75</strong>."},
+];
+
+/* ---- Stap 1: kennismaken ---- */
+async function start(){
+  setStep(1);await wait(550);
+  await says([
+    greeting,
+    "Ik ben <strong>Sanne</strong>, je leercoach. Ik help leerlingen om weer grip te krijgen op dingen die even niet lukken — rustig, in je eigen tempo, zonder cijfers of oordeel.",
+    "Maar voordat we beginnen: hoe mag ik je noemen?"
+  ]);
+  textInput("Typ je naam of roepnaam…",gotName,"Je naam blijft gewoon hier in dit gesprek.");
+}
+async function gotName(n){
+  name=escapeHtml(n.split(' ')[0]);
+  await says([
+    `Leuk je te ontmoeten, ${name}.`,
+    "Voordat we de boeken openslaan ben ik benieuwd hoe het op dit moment met je gaat op school. Loopt het lekker, of zitten er dingen tegen?"
+  ]);
+  options([
+    {label:"Het gaat eigenlijk best goed",action:()=>mood('good')},
+    {label:"Wisselend — het ene lukt, het andere niet",action:()=>mood('mixed')},
+    {label:"Eerlijk gezegd: het zit me tegen",action:()=>mood('low')}
+  ],"Er is geen goed of fout antwoord.");
+}
+async function mood(m){
+  if(m==='good') await says([
+    `Wat goed om te horen, ${name}.`,
+    "Dan komen we vandaag vooral om iets dat al aardig gaat, nóg steviger te maken. Daar word ik blij van."
+  ]);
+  else if(m==='mixed') await says([
+    `Dat herken ik van heel veel leerlingen, ${name}. Het ene vak gaat vanzelf, het andere kost juist energie.`,
+    "Laten we dan focussen op het stuk dat nu het meeste tegenzit — dáár valt de meeste winst te halen."
+  ]);
+  else await says([
+    `Dank je dat je dat zo eerlijk zegt, ${name}. Dat is helemaal niet gek; iedereen heeft periodes waarin school zwaar voelt.`,
+    "Goed nieuws: we hoeven het vandaag niet in één keer op te lossen. We pakken gewoon rustig één ding samen aan, stap voor stap.",
+  ]);
+  await says(["Waar zullen we vandaag samen naar kijken?"]);
+  options([
+    {label:"Rekenen met breuken",action:explore},
+    {label:"Iets met taal of Engels",action:language},
+    {label:"Ik weet het zelf niet zo goed",action:unsure}
+  ]);
+}
+async function unsure(){
+  await says([
+    `Geen probleem, ${name} — dan help ik je kiezen.`,
+    "Bij heel veel leerlingen zijn breuken het onderdeel waar in de klas net iets te snel overheen is gegaan. En het mooie is: als breuken eenmaal 'klikken', wordt een heleboel ander rekenen ineens een stuk makkelijker.",
+    "Zullen we daar samen induiken?"
+  ]);
+  options([{label:"Ja, goed idee",primary:true,action:explore},{label:"Liever iets met taal",action:language}]);
+}
+async function language(){
+  setStep(2);
+  await says([
+    `Mooi, ${name} — taal is een prachtig vak om aan te werken.`,
+    "Mijn oefenmateriaal voor vandaag staat klaar rondom <strong>breuken</strong>. Ik stel voor dat we die samen doorlopen, zodat je precies voelt hóe ik te werk ga.",
+    "Daarna kan ik dezelfde aanpak voor taal voor je inrichten. Goed plan?"
+  ]);
+  options([{label:"Ja, laat de aanpak maar zien",primary:true,action:explore},{label:"Liever niet vandaag",action:exit}]);
+}
+
+/* ---- Stap 2: verkennen ---- */
+async function explore(){
+  topic="breuken";setStep(2);
+  await says([
+    `Top, ${name}. Breuken dus.`,
+    "Even eerlijk tegen je: breuken voelen voor heel veel mensen wiebelig. Je bent echt niet de enige die hierop vastloopt — ik help er bijna elke dag iemand mee.",
+    "Mag ik je eerst een paar vragen stellen? Dan begrijp ik beter waar het 'm bij jou in zit."
+  ]);
+  options([{label:"Ja, vraag maar",primary:true,action:exploreWhen}]);
+}
+async function exploreWhen(){
+  await says([`Wanneer merk je meestal dat het misgaat met breuken, ${name}?`]);
+  options([
+    {label:"Tijdens de uitleg in de klas",action:()=>exploreFeel('klas')},
+    {label:"Bij mijn huiswerk, als ik het alleen doe",action:()=>exploreFeel('huiswerk')},
+    {label:"Vooral bij toetsen",action:()=>exploreFeel('toets')},
+    {label:"Eerlijk gezegd: eigenlijk steeds",action:()=>exploreFeel('steeds')}
+  ]);
+}
+async function exploreFeel(when){
+  const r={
+    klas:"Dat hoor ik vaker. In de klas gaat het soms net iets te snel, en dan haak je ongemerkt af — terwijl de rest doorgaat.",
+    huiswerk:"Heel herkenbaar. In de les lijkt alles te kloppen, maar zodra je alleen aan tafel zit, blijkt het toch nét niet vast te zitten.",
+    toets:"Ah, dus de spanning van een toets speelt mee. Dat maakt het extra lastig — onder druk verdwijnt kennis soms even naar de achtergrond.",
+    steeds:"Dank je voor je eerlijkheid. Dan beginnen we gewoon lekker bij de basis en bouwen we het rustig op. Geen zorgen."
+  }[when];
+  await says([r,"En als breuken niet lukken — wat doet dat met je?"]);
+  options([
+    {label:"Ik word er gefrustreerd van",action:()=>exploreTeach('frus')},
+    {label:"Ik raak in de war",action:()=>exploreTeach('war')},
+    {label:"Ik geef het vaak snel op",action:()=>exploreTeach('op')},
+    {label:"Valt mee, gewoon lastig",action:()=>exploreTeach('ok')}
+  ]);
+}
+async function exploreTeach(feel){
+  const r={
+    frus:`Frustratie is logisch, ${name} — het betekent dat je het juist graag wílt snappen. Die motivatie gaan we gebruiken.`,
+    war:`In de war raken hoort er soms gewoon bij. We maken het samen weer overzichtelijk, stukje voor stukje.`,
+    op:`Dat je het soms opgeeft, snap ik goed. Daarom gaan we het vandaag klein en behapbaar houden, zodat opgeven niet nodig is.`,
+    ok:`Fijn dat je er nuchter in zit, ${name}. Dan maken we 'lastig' vandaag gewoon een beetje minder lastig.`
+  }[feel];
+  await says([
+    r,
+    "Laten we het samen heel rustig opbouwen. Ik beloof je: breuken zijn logischer dan ze lijken.",
+    "Kijk even met me mee. Een breuk laat een <strong>deel van een geheel</strong> zien. Stel je een reep chocola voor.",
+    `De <strong>onderkant</strong> zegt in hoeveel gelijke stukken je de reep breekt. De <strong>bovenkant</strong> zegt hoeveel van die stukken jij pakt. Zo ziet 3/4 eruit:${fracViz([{label:"3/4",d:4,n:3}])}`,
+    "Drie van de vier stukken, zie je het? In de kern is het niet ingewikkelder dan dat."
+  ]);
+  await says([`Kun je me tot hier nog volgen, ${name}?`]);
+  options([
+    {label:"Ja, dit snap ik",primary:true,action:proposeTest},
+    {label:"Grotendeels wel",action:proposeTest},
+    {label:"Nee, nog niet helemaal",action:explainMore}
+  ]);
+}
+async function explainMore(){
+  await says([
+    `Heel goed dat je dat aangeeft, ${name} — juist dáár leren we van. We nemen het rustig nog een keer.`,
+    "De breuk 1/2 betekent: 'één van de twee gelijke stukken'. Dus precies de helft.",
+    `Zo:${fracViz([{label:"1/2",d:2,n:1}])}`,
+    "En kijk nu naar 2/4 — 'twee van de vier stukken':",
+    `${fracViz([{label:"2/4",d:4,n:2}])}`,
+    "Zie je dat het precies even veel is? Dezelfde hoeveelheid, alleen anders opgeschreven. Dát is misschien wel de belangrijkste truc bij breuken: dezelfde waarde kan er verschillend uitzien.",
+    "Lukt het zo iets beter?"
+  ]);
+  options([
+    {label:"Ja, nu wel",primary:true,action:proposeTest},
+    {label:"Een beetje — ik probeer het gewoon",action:proposeTest}
+  ]);
+}
+async function proposeTest(){
+  await says([
+    `Mooi, ${name}. Dan stel ik voor dat we het meteen even gaan uitproberen — dat is de beste manier om te zien wat al zit.`,
+    "Ik geef je <strong>4 korte vragen</strong>. Niet voor een cijfer, echt niet — maar zodat ik precies zie wat al lukt en waar ik je nog bij kan helpen.",
+    "Bij elk antwoord leg ik direct uit hoe het zit, met een tekening erbij. Goed of fout maakt niet uit; ik leer er net zo goed van als jij."
+  ]);
+  options([
+    {label:"Ja, ik ben er klaar voor",primary:true,action:beginQuiz},
+    {label:"Ik ben een beetje zenuwachtig",action:reassure},
+    {label:"Liever niet",action:exit}
+  ]);
+}
+async function reassure(){
+  await says([
+    `Dat snap ik, ${name}, maar je hoeft hier helemaal niets te bewijzen.`,
+    "Er kijkt niemand mee, er is geen cijfer, en een fout maken is hier juist waardevol — dan weet ik precies waar ik je kan helpen.",
+    "Zullen we het gewoon rustig proberen, vraag voor vraag? Ik blijf de hele tijd bij je."
+  ]);
+  options([{label:"Oké, laten we het doen",primary:true,action:beginQuiz},{label:"Toch liever niet",action:exit}]);
+}
+
+/* ---- Stap 3: oefenen ---- */
+let idx=0,correctCount=0,streak=0;
+async function beginQuiz(){
+  setStep(3);idx=0;correctCount=0;streak=0;
+  await says([`Top, ${name}. Even diep ademhalen — en neem rustig de tijd. Daar gaan we.`]);
+  askQuestion();
+}
+async function askQuestion(){
+  const q=quiz[idx];
+  await says([`<strong>Vraag ${idx+1} van ${quiz.length}.</strong> ${q.q}`]);
+  clearDock();
+  const wrap=document.createElement('div');wrap.className='options quiz-grid';
+  q.options.forEach((label,i)=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=label;
+    b.addEventListener('click',async()=>{
+      const correct=i===q.correct;skills[idx].ok=correct;
+      [...wrap.children].forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('correct');});
+      if(!correct)b.classList.add('wrong');
+      play(correct?'good':'gentle');
+      await wait(280);
+      // menselijke reactie eerst
+      let lead;
+      if(correct){streak++;
+        lead = streak>=2 ? pick([`Weer raak, ${name}! Je komt op dreef.`,`Mooi, alweer goed. Ik zie je zelfvertrouwen groeien.`,`Lekker bezig, ${name} — twee op rij.`])
+                          : pick([`Goed gedaan, ${name}!`,`Ja! Helemaal correct.`,`Top, dat klopt.`]);
+      }else{streak=0;
+        lead = pick([`Geen probleem, ${name} — hier leren we juist van.`,`Niks aan de hand, dit is een veelgemaakte fout.`,`Rustig maar, we kijken even samen wat hier gebeurt.`]);
+      }
+      await says([lead]);
+      if(correct)correctCount++;
+      await says([(correct?q.ok:q.no)+(q.viz?`<div class="viz">${q.viz}</div>`:'')]);
+      idx++;
+      if(idx===2){ checkIn(); }
+      else if(idx<quiz.length){ await wait(150); askQuestion(); }
+      else finish();
+    });
+    wrap.appendChild(b);
+  });
+  dock.appendChild(wrap);const f=wrap.querySelector('button');if(f)f.focus();
+}
+async function checkIn(){
+  await says([`We zijn op de helft, ${name}. Je doet het goed — zin om door te gaan?`]);
+  options([
+    {label:"Ja, door naar de volgende",primary:true,action:()=>{askQuestion();}},
+    {label:"Heel even pauze",action:async()=>{
+      await says(["Helemaal goed. Neem je tijd — we gaan verder wanneer jij er klaar voor bent."]);
+      options([{label:"Oké, ik ben er weer",primary:true,action:()=>{askQuestion();}}]);
+    }}
+  ]);
+}
+
+/* ---- Stap 4: jouw plan ---- */
+async function finish(){
+  setStep(4);clearDock();
+  let reflect;
+  if(correctCount===4) reflect=`Weet je wat me opviel, ${name}? Je twijfelde af en toe, maar je antwoorden klopten stuk voor stuk. Je kunt dit gewoon — je moet jezelf alleen wat vaker geloven.`;
+  else if(correctCount===0) reflect=`Weet je wat ik knap vind, ${name}? Je bleef rustig doorgaan, ook toen het tegenzat. Dat is precies de instelling waarmee dit gaat lukken.`;
+  else if(correctCount>=2) reflect=`Weet je wat me opviel, ${name}? Je had de meeste vragen goed, en bij de rest zag ik je echt nadenken. Daar bouwen we op verder.`;
+  else reflect=`Weet je, ${name}? Het begin is altijd het lastigst, en je hebt 'm gewoon doorgezet. Daar mag je trots op zijn.`;
+  await says([
+    `Zo, ${name}. Alle vier de vragen gedaan — knap dat je het hebt doorgezet.`,
+    reflect,
+    "Ik heb hieronder voor je samengevat waar je nu staat en wat een logische volgende stap is. Lees rustig, er is geen haast."
+  ]);
+
+  const gaps=skills.filter(s=>s.ok===false);
+  let headline,lead;
+  if(correctCount===4){headline="Je beheerst breuken goed.";lead="Alle vier de onderdelen zaten goed. Tijd om het wat uitdagender te maken.";}
+  else if(correctCount===0){headline="Een eerlijk startpunt.";lead="We beginnen rustig bij de basis en bouwen het samen op. Dit komt goed.";}
+  else{headline="Je bent goed op weg.";lead=`${correctCount} van de 4 onderdelen zit al stevig. We richten ons nu op de rest.`;}
+
+  const C=2*Math.PI*42, off=C*(1-correctCount/4);
+  const skillRows=skills.map(s=>{const ok=s.ok===true;return `<div class="skill ${ok?'ok':'gap'}">
+    <div class="ic" aria-hidden="true">${ok?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"/><circle cx="12" cy="16.4" r=".5" fill="currentColor"/></svg>'}</div>
+    <div class="txt"><div class="name">${s.name}</div><div class="tag">${ok?'Zit goed':'Nog even oefenen'}</div></div></div>`;}).join('');
+
+  let steps;
+  if(gaps.length===0) steps=[
+    "Probeer breuken met grotere getallen, bijvoorbeeld <strong>5/8 + 1/4</strong>.",
+    "Reken een paar breuken om naar procenten (3/4 = 75%). Zo zie je het verband.",
+    "Pas een breuk toe in een echte situatie, zoals een recept halveren."];
+  else{steps=[
+    `Begin bij <strong>${gaps[0].name.toLowerCase()}</strong>. Doe hier deze week 5 minuten per dag — kort maar regelmatig werkt het best.`,
+    "Leg elke som hardop aan jezelf uit, alsof je het aan mij vertelt. Dat maakt het kwartje sneller los.",
+    "Twijfel je? Teken een balkje of reep, net als hierboven. Zien helpt enorm."];
+    if(gaps.length>1) steps.push(`Heb je dat onder de knie? Pak dan <strong>${gaps[1].name.toLowerCase()}</strong> op dezelfde manier op.`);
+  }
+
+  const card=document.createElement('div');card.className='summary anim-in';
+  card.innerHTML=`
+    <div class="sum-head">
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96"><circle class="ring-bg" cx="48" cy="48" r="42" fill="none" stroke-width="8"/>
+        <circle class="ring-fg" cx="48" cy="48" r="42" fill="none" stroke-width="8" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+        <div class="ring-text">${correctCount}/4</div>
+      </div>
+      <div class="sum-title"><h2>${headline}</h2><p>${lead}<br><span style="color:var(--muted)">Onderwerp: ${topic}</span></p></div>
+    </div>
+    <div class="skills">${skillRows}</div>
+    <div class="plan">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Jouw vervolgstappen</h3>
+      <ol>${steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>`;
+  document.querySelector('.panel').appendChild(card);
+  requestAnimationFrame(()=>{const fg=card.querySelector('.ring-fg');if(fg)fg.style.strokeDashoffset=off;});
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+
+  await wait(700);
+  await says([
+    `Onthoud dit, ${name}: je liep hier vandaag niet voor weg, en dat is precies de houding waarmee je vooruitkomt.`,
+    "Ik ben er weer zodra je verder wilt. Tot snel."
+  ]);
+  await wait(300);addCTA();
+}
+
+async function exit(){
+  setStep(4);
+  await says([
+    `Helemaal goed, ${name}, geen enkel probleem.`,
+    "Eén ding om mee te nemen voor straks: bij het optellen van breuken maak je éérst de noemers gelijk, en daarna tel je pas de bovenkanten op.",
+    "Je bent altijd welkom om terug te komen wanneer het je beter uitkomt. Tot dan."
+  ]);
+  await wait(300);addCTA();
+}
+
+function addCTA(){
+  const cta=document.createElement('div');cta.className='cta anim-in';
+  cta.innerHTML=`
+    <div class="ct"><h3>Deze coach op maat voor jouw vak of klas?</h3>
+      <p>We richten de leercoach in op jouw leerdoelen, niveau en lesstof — voor één leerling of een hele groep.</p></div>
+    <a class="wa" href="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20praten%20over%20de%20AI%20Leercoach." target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.15-1.7-.84-2-.94s-.46-.15-.66.15-.76.94-.93 1.13-.34.22-.63.07a8.1 8.1 0 01-2.4-1.48 9 9 0 01-1.66-2.06c-.17-.3 0-.46.13-.6s.3-.35.44-.52a2 2 0 00.3-.5.55.55 0 000-.52c-.07-.15-.66-1.6-.9-2.18s-.48-.5-.66-.5h-.57a1.1 1.1 0 00-.8.37 3.35 3.35 0 00-1.04 2.48 5.8 5.8 0 001.22 3.08 13.3 13.3 0 005.1 4.5c.71.3 1.27.49 1.7.63a4.1 4.1 0 001.88.12 3.07 3.07 0 002-1.42 2.5 2.5 0 00.18-1.42c-.07-.13-.27-.2-.57-.35zM12 2a10 10 0 00-8.5 15.27L2 22l4.85-1.27A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.18-1.15l-.3-.18-2.88.76.77-2.8-.2-.31A8.2 8.2 0 1112 20.2z"/></svg>
+      Plan een gesprek</a>`;
+  endZone.appendChild(cta);
+  setTimeout(()=>cta.scrollIntoView({behavior:'smooth',block:'center'}),300);
+}
+
+window.addEventListener('load',()=>setTimeout(start,500));
+</script>
+</body>
+</html>

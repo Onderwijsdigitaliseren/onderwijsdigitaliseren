@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lees de Klas — withitness-trainer · Onderwijs Digitaliseren</title>
+<meta name="description" content="Train je withitness: scan een levende klas, spot wat je aandacht nodig heeft en kies de beste reactie. Een praktijktrainer met expertfeedback.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f1ece1;
+  --paper-2:#e7e0d2;
+  --card:#fbf8f1;
+  --ink:#23262e;
+  --ink-soft:#4c5260;
+  --muted:#7b8392;
+  --line:rgba(35,38,46,.12);
+  --teal:#0e9aa0;
+  --teal-d:#0a7d82;
+  --coral:#ef6750;
+  --amber:#e8a52b;
+  --green:#22a866;
+  --red:#e0533c;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --disp:'Space Grotesk',var(--sans);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.22,.8,.3,1);
+  --shadow:0 18px 50px -24px rgba(30,35,45,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans); color:var(--ink); min-height:100%;
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(14,154,160,.10), transparent 60%),
+    radial-gradient(900px 500px at -5% 105%, rgba(239,103,80,.08), transparent 55%),
+    var(--paper);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+.mono{font-family:var(--mono)}
+
+/* header */
+.topbar{
+  position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:space-between;
+  padding:13px clamp(16px,4vw,40px); backdrop-filter:blur(8px);
+  background:linear-gradient(180deg, rgba(241,236,225,.92), rgba(241,236,225,.4) 70%, transparent);
+  border-bottom:1px solid var(--line);
+}
+.back-link{font-size:12.5px; font-weight:500; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:.25s}
+.back-link:hover{color:var(--teal-d); transform:translateX(-3px)}
+.brand{display:flex; align-items:center; gap:10px}
+.brand img{height:22px; filter:brightness(0); opacity:.55}
+.brand .bt{font-family:var(--disp); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+
+#app{max-width:1080px; margin:0 auto; padding:clamp(14px,3vw,28px)}
+.screen{display:none; animation:fade .5s var(--ease)}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* intro hero */
+.intro{padding:0 0 30px}
+.kicker{font-size:12px; letter-spacing:.32em; text-transform:uppercase; color:var(--teal-d); font-weight:600}
+.hero{position:relative; border-radius:24px; overflow:hidden; box-shadow:0 30px 70px -34px rgba(20,30,40,.7); border:1px solid var(--line); cursor:pointer; background:#cfe3e6}
+.hero .hero-scene svg{display:block; width:100%; height:auto}
+.hero .scrim{position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(8,22,28,.16) 0%, rgba(8,22,28,0) 24%, rgba(8,20,26,0) 46%, rgba(7,18,24,.74) 100%)}
+.hero .scanline{position:absolute; top:0; bottom:0; width:26%; pointer-events:none; background:linear-gradient(90deg, transparent, rgba(126,240,224,.16), transparent); animation:sweep 6.5s ease-in-out infinite}
+@keyframes sweep{0%{left:-30%}55%{left:104%}100%{left:104%}}
+.hero .chip{position:absolute; top:16px; left:16px; display:inline-flex; align-items:center; gap:8px; background:rgba(8,22,28,.6); color:#fff; backdrop-filter:blur(6px); padding:8px 14px; border-radius:30px; font-size:12.5px; font-weight:500; pointer-events:none; border:1px solid rgba(255,255,255,.16)}
+.hero .chip .pulse{width:9px;height:9px;border-radius:50%;background:var(--coral); box-shadow:0 0 0 0 rgba(239,103,80,.6); animation:beat 1.6s ease-out infinite}
+@keyframes beat{0%{box-shadow:0 0 0 0 rgba(239,103,80,.55)}70%{box-shadow:0 0 0 9px rgba(239,103,80,0)}100%{box-shadow:0 0 0 0 rgba(239,103,80,0)}}
+.hero .hero-text{position:absolute; left:0; right:0; bottom:0; padding:clamp(20px,3.6vw,40px); pointer-events:none}
+.hero .hero-text .kicker{color:#7ef0e0}
+.hero h1{font-family:var(--disp); font-weight:700; line-height:1; font-size:clamp(40px,8vw,82px); letter-spacing:-.02em; color:#fff; margin:8px 0 10px; text-shadow:0 4px 24px rgba(0,0,0,.4)}
+.hero h1 .g{color:#7ef0e0}
+.hero .lead{font-size:clamp(15px,2vw,19px); color:rgba(255,255,255,.92); max-width:540px; line-height:1.5; text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.hero .cta-line{display:flex; align-items:center; gap:16px; margin-top:22px; flex-wrap:wrap; pointer-events:auto}
+.hero .start-btn{pointer-events:auto}
+.hero .meta-note{color:rgba(255,255,255,.78); font-size:13px}
+.start-btn{font-family:var(--disp); font-weight:700; font-size:16px; background:var(--teal); color:#fff; border:none; padding:16px 38px; border-radius:14px; cursor:pointer; display:inline-flex; gap:12px; align-items:center; box-shadow:0 14px 34px -12px rgba(14,154,160,.9); transition:transform .2s, background .2s}
+.start-btn:hover{transform:translateY(-3px); background:var(--teal-d)}
+.start-btn .arr{transition:transform .2s} .hero:hover .start-btn .arr{transform:translateX(4px)}
+/* teaser rings on a few troublemakers */
+.hero .stu.tease .flagring{opacity:1; stroke:#ffd166; animation:tease 1.9s ease-in-out infinite}
+@keyframes tease{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.06)}}
+
+/* below-hero explainer */
+.how{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:22px 0 0}
+.how .c{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 16px; text-align:left; box-shadow:var(--shadow)}
+.how .n{font-family:var(--mono); font-size:12px; color:var(--teal-d); font-weight:700}
+.how .t{font-family:var(--disp); font-weight:600; font-size:15px; margin:8px 0 4px}
+.how .d{font-size:13px; color:var(--muted); line-height:1.5}
+.what{margin:18px 0 0; background:rgba(14,154,160,.07); border:1px solid rgba(14,154,160,.2); border-radius:14px; padding:16px 20px; font-size:14px; color:var(--ink-soft); line-height:1.55; text-align:center}
+.what b{color:var(--ink)}
+
+/* stage / scene */
+.stage-head{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:12px; flex-wrap:wrap}
+.scene-meta .st{font-family:var(--disp); font-weight:700; font-size:clamp(19px,3vw,26px); line-height:1.1}
+.scene-meta .ss{font-size:13.5px; color:var(--muted); margin-top:2px}
+.progress{display:flex; gap:6px}
+.progress .dot{width:26px; height:5px; border-radius:5px; background:var(--line)}
+.progress .dot.on{background:var(--teal)}
+.progress .dot.done{background:var(--teal-d)}
+
+.phase-bar{
+  display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:12px 16px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.phase-bar .pi{font-size:22px}
+.phase-bar .px{flex:1}
+.phase-bar .pt{font-family:var(--disp); font-weight:600; font-size:15px}
+.phase-bar .pd{font-size:13px; color:var(--muted)}
+.timer{position:relative; width:54px; height:54px; flex:none}
+.timer svg{transform:rotate(-90deg)}
+.timer .tnum{position:absolute; inset:0; display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:16px; color:var(--ink)}
+.found-count{font-family:var(--mono); font-weight:700; font-size:15px; color:var(--teal-d); background:rgba(14,154,160,.1); padding:6px 12px; border-radius:20px}
+
+.scene-frame{position:relative; border-radius:18px; overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line); background:#cfe3e6}
+.scene-frame svg{display:block; width:100%; height:auto}
+.scan-vignette{position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 120px 20px rgba(20,40,45,.28); opacity:0; transition:opacity .5s}
+.scene-frame.scanning .scan-vignette{opacity:1}
+
+.stage-actions{display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap}
+.btn{font-family:var(--disp); font-weight:600; font-size:14.5px; border:none; border-radius:12px; padding:13px 24px; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:8px}
+.btn.primary{background:var(--teal); color:#fff; box-shadow:0 12px 28px -14px rgba(14,154,160,.8)}
+.btn.primary:hover{background:var(--teal-d); transform:translateY(-2px)}
+.btn.ghost{background:transparent; border:1px solid var(--line); color:var(--ink)}
+.btn.ghost:hover{border-color:var(--ink)}
+
+/* hints / toasts */
+.toast{position:fixed; left:50%; bottom:84px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:30px; font-size:13.5px; z-index:65; box-shadow:var(--shadow); transition:opacity .4s; pointer-events:none; max-width:90vw; text-align:center}
+
+/* review */
+.review{margin-top:14px}
+.spot-status{display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; padding:5px 12px; border-radius:20px; margin-bottom:10px}
+.spot-status.caught{background:rgba(34,168,102,.14); color:var(--green)}
+.spot-status.missed{background:rgba(224,83,60,.14); color:var(--red)}
+.diag-card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:var(--shadow); animation:fade .4s var(--ease)}
+.diag-card .dl{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.diag-card h3{font-family:var(--disp); font-weight:700; font-size:clamp(18px,3vw,23px); margin:6px 0 6px}
+.diag-card .desc{font-size:14.5px; color:var(--ink-soft); line-height:1.55; margin-bottom:16px}
+.resp{display:grid; gap:10px}
+.resp button{
+  text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; cursor:pointer;
+  font-size:14px; color:var(--ink); transition:.18s; line-height:1.4;
+}
+.resp button:hover:not(:disabled){border-color:var(--teal); background:rgba(14,154,160,.04)}
+.resp button:disabled{cursor:default}
+.resp button.chosen{border-width:2px}
+.resp button.best.reveal{border-color:var(--green); background:rgba(34,168,102,.08)}
+.resp button.ok.reveal{border-color:var(--amber); background:rgba(232,165,43,.08)}
+.resp button.poor.reveal{border-color:var(--red); background:rgba(224,83,60,.08)}
+.resp .tagq{float:right; font-size:11px; font-weight:700; font-family:var(--mono); padding:2px 8px; border-radius:10px; margin-left:8px}
+.feedback{margin-top:16px; border-left:3px solid var(--teal); background:rgba(14,154,160,.06); border-radius:0 12px 12px 0; padding:14px 16px; animation:fade .35s var(--ease)}
+.feedback .fl{font-family:var(--disp); font-weight:600; font-size:14px; margin-bottom:4px}
+.feedback .fb{font-size:13.5px; color:var(--ink-soft); line-height:1.55}
+.feedback .cite{font-size:12px; color:var(--muted); margin-top:8px; font-style:italic}
+.diag-next{margin-top:16px; display:flex; justify-content:flex-end}
+
+/* scene score interstitial */
+.sscore{text-align:center; padding:30px 10px}
+.sscore .big{font-family:var(--mono); font-weight:700; font-size:64px; line-height:1; color:var(--teal-d)}
+.sscore .lbl{font-family:var(--disp); font-weight:600; font-size:16px; margin-top:6px}
+.sscore .row{display:flex; gap:18px; justify-content:center; margin:22px 0; flex-wrap:wrap}
+.sscore .row .it{font-size:13px; color:var(--muted)} .sscore .row .it b{display:block; font-family:var(--mono); font-size:22px; color:var(--ink)}
+
+/* debrief */
+.debrief h2{font-family:var(--disp); font-weight:700; font-size:clamp(28px,5vw,42px); letter-spacing:-.01em}
+.deb-grade{display:inline-block; margin-top:6px; font-family:var(--disp); font-weight:700; font-size:18px; padding:6px 16px; border-radius:30px}
+.deb-scores{display:flex; gap:14px; flex-wrap:wrap; margin:20px 0}
+.ds{flex:1 1 150px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+.ds .dl{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.ds .dv{font-family:var(--mono); font-weight:700; font-size:34px; margin-top:6px}
+.ds .dsub{font-size:12px; color:var(--muted)}
+.recap{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:16px; box-shadow:var(--shadow)}
+.recap h3{font-family:var(--disp); font-weight:600; font-size:15px; margin-bottom:4px}
+.recap .rsub{font-size:12.5px; color:var(--muted); margin-bottom:14px}
+.thumbs{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+.thumb{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#cfe3e6}
+.thumb svg{display:block; width:100%; height:auto}
+.thumb .cap{padding:8px 10px; background:var(--card); font-size:12px; color:var(--ink-soft)}
+.thumb .cap b{font-family:var(--mono)}
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12.5px; color:var(--muted)}
+.legend .lg{display:inline-flex; align-items:center; gap:6px}
+.legend .sw{width:12px;height:12px;border-radius:50%}
+.tips{display:grid; gap:10px; margin-bottom:16px}
+.tip{background:var(--card); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:0 12px 12px 0; padding:14px 16px; box-shadow:var(--shadow)}
+.tip.warn{border-left-color:var(--amber)} .tip.good{border-left-color:var(--green)}
+.tip .th{font-family:var(--disp); font-weight:600; font-size:14px; margin-bottom:3px}
+.tip .tb{font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+
+.cta{margin-top:26px; background:linear-gradient(120deg, rgba(14,154,160,.08), rgba(239,103,80,.06)); border:1px solid var(--line); border-radius:18px; padding:clamp(22px,4vw,36px); text-align:center}
+.cta .ck{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--teal-d);font-weight:600}
+.cta h3{font-family:var(--disp); font-weight:700; font-size:clamp(21px,3.4vw,30px); margin:10px 0; line-height:1.2}
+.cta p{color:var(--ink-soft); max-width:520px; margin:0 auto 22px; line-height:1.55}
+.cta-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+.wa{background:var(--teal); color:#fff; border:none; font-weight:600; font-size:14px; padding:15px 26px; border-radius:12px; text-decoration:none; display:inline-flex; gap:10px; align-items:center; transition:.2s}
+.wa:hover{transform:translateY(-3px); background:var(--teal-d)}
+.wa svg{width:18px;height:18px;fill:currentColor}
+.cta-sign{margin-top:20px; font-size:13px; color:var(--muted)} .cta-sign b{color:var(--ink)}
+
+/* SVG figure animations & states */
+.stu .hit{fill:transparent; cursor:pointer}
+.stu .bob{animation:idle 3.6s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.stu .flagring{opacity:0; transition:opacity .2s, transform .2s; transform-origin:center; transform-box:fill-box}
+.stu.flagged .flagring{opacity:1; animation:ringPop .3s var(--ease)}
+@keyframes ringPop{from{transform:scale(.6)}to{transform:scale(1)}}
+.stu .ripple{opacity:0}
+.stu.ping .ripple{animation:rip .55s ease-out}
+@keyframes rip{0%{opacity:.5;transform:scale(.3);transform-origin:center;transform-box:fill-box}100%{opacity:0;transform:scale(1.7);transform-origin:center;transform-box:fill-box}}
+.cue-glow{animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.cue-zzz{animation:zzz 3s ease-in-out infinite}
+@keyframes zzz{0%{opacity:0;transform:translateY(4px)}30%{opacity:.9}100%{opacity:0;transform:translateY(-10px)}}
+.cue-wob{animation:wob 2.4s ease-in-out infinite; transform-origin:bottom center; transform-box:fill-box}
+@keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.cue-hand{animation:sway 2.2s ease-in-out infinite; transform-origin:bottom center; transform-box:fill-box}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(5deg)}}
+.cue-q{animation:bobq 2.6s ease-in-out infinite}
+@keyframes bobq{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+/* review highlight */
+.scene-frame.review-mode .stu{opacity:.32; transition:opacity .4s}
+.scene-frame.review-mode .stu.spot{opacity:1}
+.stu .outcome{opacity:0}
+.scene-frame.recap .stu .outcome{opacity:1}
+
+@media (max-width:680px){ .how{grid-template-columns:1fr; max-width:380px} .thumbs{grid-template-columns:1fr} .brand .bt{display:none} }
+@media (prefers-reduced-motion:reduce){ *{animation-duration:.001s!important} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back-link" href="../onderwijs-digitaliseren.html#voorbeelden"><span aria-hidden="true">←</span> Terug naar voorbeelden</a>
+  <span class="brand" aria-label="Onderwijs Digitaliseren">
+    <img src="../logo.png" alt="" onerror="this.style.display='none'">
+    <span class="bt">Onderwijs Digitaliseren</span>
+  </span>
+</header>
+
+<main id="app">
+
+  <!-- INTRO -->
+  <section class="screen active intro" id="intro">
+    <div class="hero" id="hero">
+      <div class="hero-scene" id="heroScene"></div>
+      <div class="scanline"></div>
+      <div class="scrim"></div>
+      <div class="chip"><span class="pulse"></span> Er speelt van alles in deze klas — zie jij het?</div>
+      <div class="hero-text">
+        <div class="kicker">Withitness-trainer</div>
+        <h1>Lees de <span class="g">Klas</span></h1>
+        <p class="lead">De beste docenten zien álles. Train die blik: scan een levende klas, spot wat je aandacht vraagt, en kies de juiste reactie.</p>
+        <div class="cta-line">
+          <button class="start-btn" id="startBtn">Begin de training <span class="arr" aria-hidden="true">→</span></button>
+          <span class="meta-note">3 klassen · ± 4 minuten · feedback op basis van onderzoek</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="how">
+      <div class="c"><div class="n">01 · SCAN</div><div class="t">Spot de signalen</div><div class="d">Je krijgt enkele seconden. Tik aan wat ingrijpen vraagt — en laat met rust wat goed gaat.</div></div>
+      <div class="c"><div class="n">02 · REAGEER</div><div class="t">Kies je aanpak</div><div class="d">Per situatie kies je de beste interventie. Niet elke reactie helpt even goed.</div></div>
+      <div class="c"><div class="n">03 · LEER</div><div class="t">Krijg feedback</div><div class="d">Expertduiding per keuze, plus wat je over het hoofd zag. Zo scherp je je blik.</div></div>
+    </div>
+
+    <div class="what"><b>Wat is withitness?</b> Een term van onderwijsonderzoeker Jacob Kounin: continu weten wat er in je hele klas speelt — en dat laten merken. Het is een van de sterkste voorspellers van rust en betrokkenheid. En het is te trainen.</div>
+  </section>
+
+  <!-- STAGE -->
+  <section class="screen" id="stage">
+    <div class="stage-head">
+      <div class="scene-meta"><div class="st" id="sceneTitle"></div><div class="ss" id="sceneSub"></div></div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="phase-bar" id="phaseBar">
+      <div class="pi" id="phaseIcon">🔍</div>
+      <div class="px"><div class="pt" id="phaseTitle">Scan de klas</div><div class="pd" id="phaseDesc">Tik op alles wat je aandacht nodig heeft.</div></div>
+      <div class="found-count" id="foundCount" style="display:none">0 gemarkeerd</div>
+      <div class="timer" id="timer">
+        <svg width="54" height="54"><circle cx="27" cy="27" r="23" fill="none" stroke="rgba(35,38,46,.1)" stroke-width="5"></circle><circle id="timerArc" cx="27" cy="27" r="23" fill="none" stroke="#0e9aa0" stroke-width="5" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="0"></circle></svg>
+        <div class="tnum" id="timerNum">14</div>
+      </div>
+    </div>
+
+    <div class="scene-frame" id="sceneFrame">
+      <div id="sceneSvg"></div>
+      <div class="scan-vignette"></div>
+    </div>
+
+    <div class="stage-actions" id="stageActions"></div>
+    <div class="review" id="reviewArea"></div>
+  </section>
+
+  <!-- DEBRIEF -->
+  <section class="screen debrief" id="debrief"></section>
+
+</main>
+
+<div class="toast" id="toast" style="opacity:0"></div>
+
+<script>
+"use strict";
+
+/* audio removed — no-op stub keeps call sites harmless */
+const Audio={start(){},show(){},toggle(){},fx(){}};
+
+/* ============================================================
+   ISSUE LIBRARY  (responses: q = best|ok|poor)
+   ============================================================ */
+const ISSUES = {
+  phone:{
+    label:"Telefoon onder de tafel", icon:"📱",
+    desc:"Een leerling zit verscholen op de telefoon te kijken, half onder het tafelblad.",
+    responses:[
+      {t:"Loop rustig die kant op en ga naast de leerling staan tot de telefoon verdwijnt — zonder iets te zeggen.", q:"best",
+       fb:"Nabijheid en een non-verbaal signaal lossen dit vaak op zónder de les te onderbreken of de leerling publiek te maken.", cite:"Kounin: low-profile correction · Marzano: nabijheid"},
+      {t:"Roep door de klas: \u201cTelefoon weg, nu!\u201d", q:"poor",
+       fb:"Publiek terechtwijzen onderbreekt de hele klas en lokt vaak een machtsstrijd uit. De aandacht van álle leerlingen verschuift naar het conflict.", cite:"vermijd het 'ripple effect' van Kounin"},
+      {t:"Negeren — het gaat vast vanzelf over.", q:"poor",
+       fb:"Negeren ondermijnt je withitness: leerlingen merken dat je het niet ziet, en het gedrag verspreidt zich.", cite:"Kounin: withitness"}
+    ]
+  },
+  whisper:{
+    label:"Twee leerlingen kletsen", icon:"💬",
+    desc:"Twee leerlingen naast elkaar fluisteren en zijn afgeleid van het werk.",
+    responses:[
+      {t:"Maak even oogcontact en gebruik een korte non-verbale cue (hoofdknik richting het werk) terwijl je doorgaat.", q:"best",
+       fb:"Een subtiel signaal corrigeert zonder de les te breken — en laat de rest zien dat je het doorhebt.", cite:"Kounin: withitness & overlapping"},
+      {t:"Loop ernaartoe en herhaal de opdracht zacht bij hun tafel.", q:"ok",
+       fb:"Werkt prima en is weinig confronterend. Iets duurder qua tijd dan een non-verbale cue, maar effectief.", cite:"Marzano: nabijheid"},
+      {t:"Zet er één apart aan een andere tafel, direct.", q:"poor",
+       fb:"Een zware maatregel voor licht gedrag escaleert onnodig en kost veel lestijd en goodwill.", cite:"proportionaliteit van interventies"}
+    ]
+  },
+  gaze:{
+    label:"Dromer bij het raam", icon:"🌥️",
+    desc:"Een leerling staart naar buiten en is met de gedachten elders — niet storend, wel afgehaakt.",
+    responses:[
+      {t:"Noem terloops de naam van de leerling in je uitleg (\u201cZoals Sem misschien herkent\u2026\u201d) om weer aan te haken.", q:"best",
+       fb:"Je haalt de leerling terug zonder te beschamen, en houdt het tempo erin. Een naam in de uitleg is een zachte ankering.", cite:"Rosenshine: betrek alle leerlingen"},
+      {t:"Stel direct een moeilijke vraag om de leerling te 'betrappen'.", q:"poor",
+       fb:"Een gotcha-vraag zet de leerling klem en kan angst en weerstand oproepen — slecht voor de werkrelatie.", cite:"vermijd publieke afrekening"},
+      {t:"Laat het gaan; de leerling stoort niemand.", q:"ok",
+       fb:"Begrijpelijk bij tijdsdruk, maar stil afhaken is juist makkelijk te missen. Een afgehaakte leerling leert weinig.", cite:"stille disengagement"}
+    ]
+  },
+  stuck:{
+    label:"Vastgelopen, aarzelende hand", icon:"✋",
+    desc:"Een leerling zit vast, kijkt zoekend rond en steekt aarzelend een half hand op.",
+    responses:[
+      {t:"Maak oogcontact, knik bemoedigend en loop er kort heen voor een gerichte check-in.", q:"best",
+       fb:"Je beloont het hulp vragen en geeft gerichte scaffolding. Dit houdt de leerling in de leerzone.", cite:"Vygotsky: zone van naaste ontwikkeling"},
+      {t:"Zeg \u201cprobeer het eerst zelf nog even\u201d zonder te kijken.", q:"poor",
+       fb:"Een aarzelende hand is fragiel; afwimpelen leert de leerling om geen hulp meer te vragen.", cite:"hulpzoekgedrag bekrachtigen"},
+      {t:"Vraag klassikaal of meer mensen vastlopen en leg het nog eens uit.", q:"ok",
+       fb:"Kan helpen als velen vastlopen, maar onderbreekt wie al verder is. Check eerst hoe breed het probleem is.", cite:"differentiatie"}
+    ]
+  },
+  sleep:{
+    label:"Wegzakkend / het hoofd op tafel", icon:"😴",
+    desc:"Een leerling hangt onderuit, hoofd bijna op tafel — uitgecheckt of niet lekker.",
+    responses:[
+      {t:"Loop er heen en vraag zacht en zonder oordeel of alles goed gaat.", q:"best",
+       fb:"Wegzakken heeft vaak een oorzaak (slaap, welbevinden). Een private, warme check-in werkt beter dan corrigeren.", cite:"relationele aanpak · welbevinden"},
+      {t:"Tik hard op de tafel om de leerling wakker te schudden.", q:"poor",
+       fb:"Schrikken en publieke schaamte beschadigen de relatie en lossen de onderliggende oorzaak niet op.", cite:"vermijd beschaming"},
+      {t:"Geef de klas een actieve werkvorm zodat iedereen weer in beweging komt.", q:"ok",
+       fb:"Een energizer kan de hele groep helpen, maar mist mogelijk het signaal dat déze leerling iets nodig heeft.", cite:"klas vs. individu"}
+    ]
+  },
+  hand:{
+    label:"Oprechte vraag — hand omhoog", icon:"🙋",
+    desc:"Een betrokken leerling steekt de hand stevig op met een echte vraag. Een kans!",
+    responses:[
+      {t:"Geef de leerling de beurt en gebruik de vraag om de hele klas mee te nemen.", q:"best",
+       fb:"Sterk: je beloont betrokkenheid én benut een goede vraag als gratis leermoment voor iedereen.", cite:"Rosenshine: vragen als motor van leren"},
+      {t:"Zeg \u201cstraks\u201d en ga door met je verhaal.", q:"ok",
+       fb:"Soms nodig voor de flow, maar te vaak uitstellen dooft betrokkenheid. Kom er dan echt op terug.", cite:"betrokkenheid bekrachtigen"},
+      {t:"Beantwoord de vraag zelf snel zonder de leerling te betrekken.", q:"poor",
+       fb:"Je mist de kans om de leerling en de klas actief te laten denken; het wordt eenrichtingsverkeer.", cite:"actieve verwerking"}
+    ]
+  },
+  note:{
+    label:"Briefje / iets doorgeven", icon:"📝",
+    desc:"Een leerling geeft stiekem iets door aan de buurman onder de tafel.",
+    responses:[
+      {t:"Loop kalm langs en leg even een hand op de tafel als signaal dat je het ziet.", q:"best",
+       fb:"Een rustig, gericht signaal stopt het gedrag zonder show. Je laat zien dat je withit bent.", cite:"Kounin: withitness"},
+      {t:"Eis het briefje op en lees het hardop voor.", q:"poor",
+       fb:"Vernederend en juridisch én pedagogisch onverstandig; het maakt jou het gesprek van de dag, niet het leren.", cite:"waardigheid van de leerling"},
+      {t:"Spreek de twee er na de les rustig op aan.", q:"ok",
+       fb:"Prima nazorg, maar in het moment is een directe, lichte cue effectiever om het nú te stoppen.", cite:"timing van interventie"}
+    ]
+  },
+  offtask:{
+    label:"Groepje volledig off-task", icon:"🔊",
+    desc:"Een groepje is luidruchtig met heel iets anders bezig dan de opdracht.",
+    responses:[
+      {t:"Loop naar het groepje, stel een gerichte vraag over de opdracht en herstel zo de focus.", q:"best",
+       fb:"Nabijheid plus een inhoudelijke vraag richt de energie terug op de taak zonder confrontatie.", cite:"Marzano: nabijheid · taakgericht herrichten"},
+      {t:"Roep van afstand dat ze stil moeten zijn.", q:"poor",
+       fb:"Op afstand corrigeren werkt zelden bij een opgewonden groepje en trekt de hele klas erbij.", cite:"vermijd het ripple effect"},
+      {t:"Geef het hele groepje strafwerk.", q:"poor",
+       fb:"Collectief straffen voelt onrechtvaardig, beschadigt de sfeer en pakt de oorzaak niet aan.", cite:"proportionaliteit"}
+    ]
+  },
+  alone:{
+    label:"Buitengesloten leerling", icon:"🪑",
+    desc:"Bij het groepswerk zit één leerling er alleen bij, buiten de groep.",
+    responses:[
+      {t:"Loop er heen, betrek de leerling subtiel bij een naburige groep met een concrete rol.", q:"best",
+       fb:"Een concrete rol geeft een ingang en voorkomt uitsluiting, zonder de leerling in de spotlight te zetten.", cite:"inclusie · sociale veiligheid"},
+      {t:"Vraag klassikaal wie er nog iemand in de groep wil.", q:"poor",
+       fb:"Dit maakt de uitsluiting publiek en pijnlijk zichtbaar. Regel het discreet.", cite:"sociale veiligheid"},
+      {t:"Laat de leerling zelfstandig verder werken.", q:"ok",
+       fb:"Soms een keuze van de leerling zelf, maar check dat het geen onbedoelde uitsluiting is.", cite:"check de behoefte"}
+    ]
+  }
+};
+
+/* ============================================================
+   SEAT LAYOUT  (viewBox 1000 x 640)
+   rows back→front, with depth scaling
+   ============================================================ */
+const ROWS=[{y:250,s:0.82},{y:380,s:0.95},{y:520,s:1.08}];
+const CENTER=500, SPREAD=210;
+function seatPos(row,col,cols){
+  const r=ROWS[row]; const span=SPREAD*r.s;
+  const x=CENTER+(col-(cols-1)/2)*span;
+  return {x,y:r.y,s:r.s};
+}
+
+/* palettes for variety (seeded by seat) */
+const SKIN=["#f0c8a0","#e8b48a","#d29b6e","#b87a4e","#8d5a34","#f4d3b0"];
+const HAIR=["#2d2419","#4a3526","#6b4a2f","#1c1c20","#7a6a55","#a98a5c","#33312e"];
+const SHIRT=["#e0533c","#0e9aa0","#e8a52b","#5b7fb0","#7a9e5a","#9a6cae","#d4806a","#4ca0a4","#c95f8a","#6b8f3d"];
+function seeded(i,arr){return arr[(i*7+3)%arr.length];}
+function shadeHex(hex,amt){const n=parseInt(hex.slice(1),16);let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');}
+
+/* ============================================================
+   FIGURE RENDERER
+   states: work, read, phone, whisper, gaze, stuck, sleep, hand, note, offtask, alone
+   ============================================================ */
+const HAIRS=['short','bun','ponytail','curly','buzz','long','cap','hoodie'];
+const HY=-96;
+
+function hairPath(v,hair){
+  switch(v){
+    case 'bun': return `<circle cx="0" cy="-122" r="9" fill="${hair}"/><path d="M-25,-98 Q-27,-121 0,-121 Q27,-121 25,-98 Q13,-110 0,-110 Q-13,-110 -25,-98Z" fill="${hair}"/>`;
+    case 'ponytail': return `<path d="M22,-100 Q42,-108 35,-80 Q31,-70 24,-80Z" fill="${hair}"/><path d="M-25,-98 Q-27,-123 0,-123 Q27,-123 25,-98 Q13,-111 0,-111 Q-13,-111 -25,-98Z" fill="${hair}"/>`;
+    case 'curly': return `<g fill="${hair}"><circle cx="-19" cy="-106" r="9.5"/><circle cx="-6" cy="-114" r="10.5"/><circle cx="8" cy="-114" r="10.5"/><circle cx="19" cy="-106" r="9.5"/><circle cx="-23" cy="-96" r="7"/><circle cx="23" cy="-96" r="7"/></g>`;
+    case 'buzz': return `<path d="M-23,-98 Q-24,-115 0,-115 Q24,-115 23,-98 Q12,-105 0,-105 Q-12,-105 -23,-98Z" fill="${hair}" opacity=".88"/>`;
+    case 'long': return `<path d="M-25,-96 Q-31,-122 0,-122 Q31,-122 25,-96 L27,-62 Q21,-70 19,-94 Q10,-110 0,-110 Q-10,-110 -19,-94 Q-21,-70 -27,-62Z" fill="${hair}"/>`;
+    case 'cap': return `<path d="M-26,-102 Q-26,-122 0,-122 Q26,-122 26,-102 Q13,-110 0,-110 Q-13,-110 -26,-102Z" fill="${hair}"/><path d="M16,-104 Q44,-106 44,-99 Q22,-98 14,-101Z" fill="${hair}"/><circle cx="0" cy="-121" r="3.4" fill="${hair}"/>`;
+    case 'hoodie': return `<path d="M-31,-92 Q-33,-126 0,-126 Q33,-126 31,-92 Q31,-76 24,-72 Q25,-104 0,-104 Q-25,-104 -24,-72 Q-31,-76 -31,-92Z" fill="${hair}"/>`;
+    default: return `<path d="M-25,-98 Q-27,-122 0,-122 Q27,-122 25,-98 Q13,-111 0,-111 Q-13,-111 -25,-98Z" fill="${hair}"/>`;
+  }
+}
+function blushM(){return `<ellipse cx="-14" cy="-88" rx="4.2" ry="2.6" fill="#ef6750" opacity=".2"/><ellipse cx="14" cy="-88" rx="4.2" ry="2.6" fill="#ef6750" opacity=".2"/>`;}
+function glasses(){return `<g stroke="#33291f" stroke-width="1.8" fill="#ffffff" fill-opacity=".18"><rect x="-15" y="-103" width="12" height="10" rx="3.5"/><rect x="3" y="-103" width="12" height="10" rx="3.5"/></g><path d="M-3,-98 h6" stroke="#33291f" stroke-width="1.8" fill="none"/>`;}
+
+function face(s){
+  const ey=-98, my=-83;
+  const eye=(dx,dy)=>`<ellipse cx="${dx}" cy="${dy}" rx="3.5" ry="3.9" fill="#fdfcfa"/><circle cx="${dx}" cy="${dy+0.5}" r="2.5" fill="#43352a"/><circle cx="${dx}" cy="${dy+0.5}" r="1.1" fill="#1c140d"/><circle cx="${dx+1.1}" cy="${dy-1.1}" r="0.95" fill="#fff"/><path d="M${dx-3.6},${dy-2.4} q3.6,-2.2 7.2,0" stroke="#7a5e44" stroke-width="1.1" fill="none" stroke-linecap="round"/>`;
+  const shut=(dx)=>`<path d="M${dx-4.5},${ey} q4.5,4 9,0" stroke="#33291f" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  const brow=(d)=>`<path d="${d}" stroke="#5a4632" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  const nose=`<path d="M0,${ey+4} q-2,4 0,5" stroke="#c98b66" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  let eyes,brows='',mouth,blush='';
+  switch(s){
+    case 'sleep':
+      eyes=shut(-8)+shut(8); brows=brow(`M-13,${ey-7} q5,-1 9,0 M4,${ey-7} q4,-1 9,0`);
+      mouth=`<ellipse cx="1" cy="${my+2}" rx="3.4" ry="4.2" fill="#9c5b48"/>`; break;
+    case 'stuck':
+      eyes=eye(-8,ey)+eye(8,ey); brows=brow(`M-13,${ey-11} q5,3 9,4 M4,${ey-7} q4,-1 9,-4`);
+      mouth=`<path d="M-5,${my+2} q5,-3.5 10,0" stroke="#9c5b48" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; break;
+    case 'hand':
+      eyes=eye(-8,ey)+eye(8,ey); brows=brow(`M-13,${ey-11} q5,-1 9,0 M4,${ey-11} q4,-1 9,0`);
+      mouth=`<path d="M-7,${my-1} q7,8 14,0 Z" fill="#9c5b48"/>`; blush=blushM(); break;
+    case 'offtask':
+      eyes=eye(-8,ey)+eye(8,ey); mouth=`<path d="M-8,${my-1} q8,9 16,0 Z" fill="#9c5b48"/><path d="M-5,${my+1} q5,2 10,0" stroke="#fff" stroke-width="2" fill="none"/>`; blush=blushM(); break;
+    case 'whisper':
+      eyes=eye(-7,ey)+eye(9,ey); brows=brow(`M-13,${ey-8} q5,-2 9,-1 M4,${ey-9} q4,-1 9,0`);
+      mouth=`<ellipse cx="3" cy="${my}" rx="3" ry="3.4" fill="#9c5b48"/>`; break;
+    case 'gaze':
+      eyes=eye(-10,ey)+eye(6,ey); brows=brow(`M-13,${ey-8} q5,-1 9,0 M4,${ey-8} q4,-1 9,0`);
+      mouth=`<path d="M-4,${my+1} h8" stroke="#9c5b48" stroke-width="2" stroke-linecap="round"/>`; break;
+    case 'note':
+      eyes=eye(-5,ey)+eye(11,ey); mouth=`<path d="M-4,${my} q5,2.5 9,-1" stroke="#9c5b48" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; break;
+    case 'alone':
+      eyes=eye(-8,ey+1)+eye(8,ey+1); brows=brow(`M-13,${ey-7} q5,1 9,2 M4,${ey-5} q4,0 9,-2`);
+      mouth=`<path d="M-5,${my+3} q5,-3.5 10,0" stroke="#9c5b48" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; break;
+    case 'phone':
+      eyes=eye(-8,ey+2)+eye(8,ey+2); brows=brow(`M-13,${ey-6} q5,-1 9,0 M4,${ey-6} q4,-1 9,0`);
+      mouth=`<path d="M-4,${my+1} q4,2 8,0" stroke="#9c5b48" stroke-width="2" fill="none" stroke-linecap="round"/>`; break;
+    default:
+      eyes=eye(-8,ey)+eye(8,ey); mouth=`<path d="M-6,${my} q6,4.5 12,0" stroke="#9c5b48" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; blush=blushM();
+  }
+  return brows+eyes+nose+mouth+blush;
+}
+
+function figure(st, idx){
+  const skin=seeded(idx,SKIN), hair=seeded(idx+1,HAIR), shirt=seeded(idx+2,SHIRT);
+  const hv=HAIRS[(idx*5+2)%HAIRS.length];
+  const hasGlasses=(idx*3+1)%4===0 && st.state!=='sleep';
+  const tilt = st.state==='phone'||st.state==='note'?7 : st.state==='whisper'?(st.lean>0?7:-7) : st.state==='gaze'?-9 : st.state==='sleep'?15 : st.state==='stuck'?-5 : st.state==='alone'?6 : 0;
+  const shirtD = shadeHex(shirt,-26), shirtL = shadeHex(shirt,24), skinD=shadeHex(skin,-26);
+
+  // soft floor shadow (grounding)
+  const shadow = `<ellipse cx="2" cy="48" rx="62" ry="9" fill="#3a2a1c" opacity=".16" filter="url(#soft)"/>`;
+
+  // 3D desk: lighter top surface, darker front + side, legs, contact shadow
+  const desk = `<path d="M-60,-5 L60,-5 L67,3 L-53,3 Z" fill="#dcbd88"/>`
+    + `<rect x="-53" y="2" width="120" height="28" rx="4" fill="#c2a06d"/>`
+    + `<rect x="-53" y="23" width="120" height="7" rx="3" fill="${'#b08f5e'}" opacity=".7"/>`
+    + `<path d="M67,3 l0,27 l-7,3 l0,-29Z" fill="#a8854f"/>`
+    + `<rect x="-47" y="30" width="7" height="15" rx="2" fill="#a8854f"/><rect x="52" y="30" width="7" height="15" rx="2" fill="#9c7b46"/>`;
+
+  // body with shading (clipped)
+  const bodyPath = `M-35,8 Q-39,-50 0,-56 Q39,-50 35,8 Z`;
+  const body = `<path d="${bodyPath}" fill="${shirt}"/>`
+    + `<clipPath id="bc${idx}"><path d="${bodyPath}"/></clipPath>`
+    + `<g clip-path="url(#bc${idx})">`
+      + `<ellipse cx="26" cy="-30" rx="30" ry="56" fill="${shirtD}" opacity=".6"/>`
+      + `<ellipse cx="-20" cy="-48" rx="20" ry="20" fill="${shirtL}" opacity=".5"/>`
+    + `</g>`
+    + `<path d="M-10,-54 Q0,-44 10,-54 L7,-49 Q0,-42 -7,-49 Z" fill="${shirtD}"/>`;
+
+  // arms + hands
+  let arms;
+  if(st.state==='hand'){
+    arms = `<path d="M-28,-46 Q-42,-22 -24,2" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="-24" cy="2" r="6.5" fill="${skin}"/>`
+      + `<g class="cue-hand"><path d="M27,-46 Q41,-92 34,-126" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M27,-46 Q41,-92 34,-126" stroke="${shirtD}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/><circle cx="34" cy="-128" r="7.5" fill="${skin}"/></g>`;
+  } else if(st.state==='phone'){
+    arms = `<path d="M-27,-46 Q-30,-18 -9,-3" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M27,-46 Q30,-18 9,-3" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="-9" cy="-3" r="6.2" fill="${skin}"/><circle cx="9" cy="-3" r="6.2" fill="${skin}"/>`;
+  } else {
+    arms = `<path d="M-29,-46 Q-40,-18 -22,2" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="-22" cy="2" r="6.5" fill="${skin}"/>`
+      + `<path d="M29,-46 Q40,-18 22,2" stroke="${shirt}" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="22" cy="2" r="6.5" fill="${skin}"/>`;
+  }
+
+  // neck + ears + head with clipped shading
+  const neck = `<rect x="-7" y="-72" width="14" height="20" rx="6" fill="${skin}"/><path d="M-7,-66 q7,5 14,0 v6 q-7,5 -14,0Z" fill="${skinD}" opacity=".5"/>`;
+  const ears = `<circle cx="-23" cy="${HY+1}" r="5" fill="${skin}"/><circle cx="23" cy="${HY+1}" r="5" fill="${skin}"/><circle cx="-23" cy="${HY+1}" r="2" fill="${skinD}" opacity=".5"/><circle cx="23" cy="${HY+1}" r="2" fill="${skinD}" opacity=".5"/>`;
+  const headShade = `<clipPath id="hc${idx}"><circle cx="0" cy="${HY}" r="24"/></clipPath>`
+    + `<g clip-path="url(#hc${idx})"><ellipse cx="12" cy="${HY+10}" rx="26" ry="26" fill="${skinD}" opacity=".28"/><ellipse cx="-11" cy="${HY-10}" rx="16" ry="14" fill="#fff" opacity=".16"/></g>`;
+  const hairSheen = `<ellipse cx="-9" cy="-115" rx="8" ry="3.6" fill="#fff" opacity=".15" transform="rotate(-22 -9 -115)"/>`;
+  const head = `<g transform="rotate(${tilt} 0 ${HY})">${ears}<circle cx="0" cy="${HY}" r="24" fill="${skin}"/>${headShade}${hairPath(hv,hair)}${hairSheen}${face(st.state)}${hasGlasses?glasses():''}</g>`;
+
+  // cues
+  let cue='';
+  if(st.state==='phone'){
+    cue += `<g class="cue-glow" transform="rotate(-6 0 -14)"><rect x="-7" y="-26" width="16" height="26" rx="3.5" fill="#1e2630"/><rect x="-4.5" y="-23" width="11" height="20" rx="1.5" fill="#7fd3ff"/><rect x="-4.5" y="-23" width="11" height="7" rx="1.5" fill="#aee6ff" opacity=".7"/></g>`;
+  } else if(st.state==='gaze'){
+    cue += `<g class="cue-q"><circle cx="35" cy="-108" r="11" fill="#fff" opacity=".94"/><circle cx="47" cy="-114" r="7" fill="#fff" opacity=".94"/><circle cx="41" cy="-100" r="5" fill="#fff" opacity=".94"/><circle cx="29" cy="-118" r="4.5" fill="#fff" opacity=".92"/></g>`;
+  } else if(st.state==='stuck'){
+    cue += `<g class="cue-q"><text x="30" y="-104" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#e8a52b">?</text></g>`;
+  } else if(st.state==='sleep'){
+    cue += `<g class="cue-zzz"><text x="26" y="-108" font-family="Space Grotesk" font-size="21" font-weight="700" fill="#7b8392">z</text><text x="39" y="-120" font-family="Space Grotesk" font-size="15" font-weight="700" fill="#7b8392">z</text></g>`;
+  } else if(st.state==='whisper'){
+    const sgn=(st.lean||0)>0?1:-1;
+    cue += `<g class="cue-wob"><circle cx="${sgn*36}" cy="-100" r="3.5" fill="#7b8392"/><circle cx="${sgn*46}" cy="-100" r="3" fill="#7b8392"/><circle cx="${sgn*54}" cy="-100" r="2.4" fill="#7b8392"/></g>`;
+  } else if(st.state==='note'){
+    cue += `<rect x="14" y="-7" width="17" height="12" rx="2" fill="#fff" stroke="#cbb48a" transform="rotate(12 22 0)"/><path d="M18,-3 h9 M18,0 h7" stroke="#cbb48a" stroke-width="1.2" transform="rotate(12 22 0)"/>`;
+  } else if(st.state==='offtask'){
+    cue += `<g class="cue-wob"><path d="M30,-104 l9,-5 M30,-98 l10,-2 M30,-92 l9,2" stroke="#e0533c" stroke-width="2.6" stroke-linecap="round"/></g>`;
+  } else if(st.state==='work'||st.state==='read'){
+    cue += `<rect x="-18" y="6" width="24" height="16" rx="2" fill="#fff" opacity=".95"/><rect x="-18" y="6" width="24" height="16" rx="2" fill="none" stroke="#d8c39a" stroke-width="1"/><rect x="-14" y="10" width="16" height="1.8" fill="#cbb48a"/><rect x="-14" y="14" width="12" height="1.8" fill="#cbb48a"/>`;
+  }
+
+  const deco = `<circle class="ripple" cx="0" cy="-86" r="44" fill="none" stroke="#0e9aa0" stroke-width="3"/>`
+    + `<circle class="flagring" cx="0" cy="-86" r="42" fill="none" stroke="#0e9aa0" stroke-width="4" stroke-dasharray="6 6"/>`
+    + `<circle class="outcome" cx="0" cy="-86" r="42" fill="none" stroke="#22a866" stroke-width="4"/>`;
+  const hit = `<rect class="hit" x="-48" y="-134" width="96" height="166"/>`;
+  const delay=((idx*0.41)%2.6).toFixed(2);
+
+  return `<g class="stu" data-idx="${idx}" data-issue="${st.issue||''}" data-state="${st.state}" transform="translate(${st.x},${st.y}) scale(${st.s})">`
+    + `${deco}<g class="bob" style="animation-delay:${delay}s">${shadow}${body}${desk}${arms}${neck}${head}${cue}</g>${hit}</g>`;
+}
+
+/* ============================================================
+   SCENES
+   each student: {row,col,state,issue}  (issue = key into ISSUES, shared id groups pairs)
+   ============================================================ */
+const SCENES=[
+  {
+    title:"De zelfstandige werkfase",
+    sub:"De klas werkt zelfstandig aan een opdracht. Jij loopt rond.",
+    cols:4, scanTime:14,
+    students:[
+      {row:0,col:0,state:'work'},
+      {row:0,col:1,state:'phone',issue:'phone'},
+      {row:0,col:2,state:'work'},
+      {row:0,col:3,state:'gaze',issue:'gaze'},
+      {row:1,col:0,state:'whisper',issue:'whisper',lean:1},
+      {row:1,col:1,state:'whisper',issue:'whisper',lean:-1},
+      {row:1,col:2,state:'work'},
+      {row:1,col:3,state:'work'},
+      {row:2,col:0,state:'read'},
+      {row:2,col:1,state:'work'},
+      {row:2,col:2,state:'stuck',issue:'stuck'},
+      {row:2,col:3,state:'work'}
+    ]
+  },
+  {
+    title:"De klassikale uitleg",
+    sub:"Je legt klassikaal iets uit. Het oog wil ook wat.",
+    cols:4, scanTime:12,
+    students:[
+      {row:0,col:0,state:'sleep',issue:'sleep'},
+      {row:0,col:1,state:'work'},
+      {row:0,col:2,state:'whisper',issue:'whisper',lean:1},
+      {row:0,col:3,state:'whisper',issue:'whisper',lean:-1},
+      {row:1,col:0,state:'work'},
+      {row:1,col:1,state:'hand',issue:'hand'},
+      {row:1,col:2,state:'work'},
+      {row:1,col:3,state:'note',issue:'note'},
+      {row:2,col:0,state:'work'},
+      {row:2,col:1,state:'work'},
+      {row:2,col:2,state:'phone',issue:'phone'},
+      {row:2,col:3,state:'work'}
+    ]
+  },
+  {
+    title:"Het groepswerk",
+    sub:"Leerlingen werken in groepjes. Subtieler — kijk goed.",
+    cols:4, scanTime:12,
+    students:[
+      {row:0,col:0,state:'offtask',issue:'offtask'},
+      {row:0,col:1,state:'offtask',issue:'offtask'},
+      {row:0,col:2,state:'work'},
+      {row:0,col:3,state:'alone',issue:'alone'},
+      {row:1,col:0,state:'work'},
+      {row:1,col:1,state:'work'},
+      {row:1,col:2,state:'phone',issue:'phone'},
+      {row:1,col:3,state:'work'},
+      {row:2,col:0,state:'gaze',issue:'gaze'},
+      {row:2,col:1,state:'work'},
+      {row:2,col:2,state:'work'},
+      {row:2,col:3,state:'stuck',issue:'stuck'}
+    ]
+  }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let sceneIdx=0, phase='scan';
+let flagged=new Set();          // idx flagged this scene
+let timerT=null, timeLeft=0;
+let results=[];                 // per scene {issues:[{id,caught}], fp, responses:[{id,q}]}
+let curScene=null, curIssueList=[], curIssuePtr=0, curResults=null;
+
+const $=id=>document.getElementById(id);
+const ARC=144.5;
+
+/* build students with positions */
+function prepScene(scene){
+  const studs=scene.students.map((s,i)=>{
+    const p=seatPos(s.row,s.col,scene.cols);
+    return {...s, x:p.x, y:p.y, s:p.s, idx:i};
+  });
+  return studs;
+}
+
+function buildSceneSVG(scene, studs, mode){
+  // classroom backdrop
+  const bg=`
+    <defs>
+      <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dde9e8"/><stop offset="1" stop-color="#c2d6d6"/></linearGradient>
+      <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3b88d"/><stop offset="1" stop-color="#b8966c"/></linearGradient>
+      <radialGradient id="warm" cx="50%" cy="20%" r="78%"><stop offset="0" stop-color="#fff6e2" stop-opacity=".5"/><stop offset="62%" stop-color="#fff6e2" stop-opacity="0"/></radialGradient>
+      <radialGradient id="vig" cx="50%" cy="46%" r="72%"><stop offset="56%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#1a1208" stop-opacity=".24"/></radialGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6edf7"/><stop offset="1" stop-color="#a9d4e6"/></linearGradient>
+      <filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
+    </defs>
+    <rect x="0" y="0" width="1000" height="640" fill="url(#wall)"/>
+    <polygon points="0,300 1000,300 1000,640 0,640" fill="url(#floor)"/>
+    <g stroke="#a8865c" stroke-width="2" opacity=".22">
+      <path d="M500,300 L120,640"/><path d="M500,300 L380,640"/><path d="M500,300 L620,640"/><path d="M500,300 L880,640"/>
+      <path d="M0,432 H1000" opacity=".5"/><path d="M0,548 H1000" opacity=".5"/>
+    </g>
+    <rect x="0" y="294" width="1000" height="10" fill="#b3946b"/>
+    <rect x="0" y="0" width="1000" height="640" fill="url(#warm)"/>
+    <!-- garland over the board -->
+    <path d="M286,52 Q500,92 714,52" stroke="#b9965f" stroke-width="2" fill="none"/>
+    <g>
+      <path d="M320,63 l-9,3 l3,-12Z" fill="#ef6750"/><path d="M380,72 l-9,2 l2,-12Z" fill="#0e9aa0"/>
+      <path d="M450,77 l-9,1 l1,-12Z" fill="#e8a52b"/><path d="M540,77 l9,1 l-1,-12Z" fill="#7a9e5a"/>
+      <path d="M620,72 l9,2 l-2,-12Z" fill="#9a6cae"/><path d="M680,63 l9,3 l-3,-12Z" fill="#ef6750"/>
+    </g>
+    <!-- board -->
+    <rect x="298" y="68" width="404" height="134" rx="9" fill="#234036"/>
+    <rect x="300" y="70" width="400" height="130" rx="8" fill="#2e4a3f"/>
+    <rect x="300" y="70" width="400" height="130" rx="8" fill="none" stroke="#9c8a5c" stroke-width="6"/>
+    <ellipse cx="430" cy="118" rx="150" ry="58" fill="#ffffff" opacity=".045"/>
+    <path d="M360,110 h180 M360,135 h240 M360,160 h140" stroke="#cfe0d2" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+    <!-- windows + light -->
+    <rect x="40" y="90" width="120" height="150" rx="6" fill="url(#glass)"/><path d="M100,90 v150 M40,165 h120" stroke="#9fc6d8" stroke-width="4"/>
+    <rect x="840" y="90" width="120" height="150" rx="6" fill="url(#glass)"/><path d="M900,90 v150 M840,165 h120" stroke="#9fc6d8" stroke-width="4"/>
+    <polygon points="46,240 158,240 120,468 -6,468" fill="#fffae8" opacity=".10"/>
+    <polygon points="842,240 954,240 1006,468 880,468" fill="#fffae8" opacity=".10"/>
+    <!-- wall clock -->
+    <circle cx="232" cy="121" r="25" fill="#3a2a1c" opacity=".12"/>
+    <circle cx="232" cy="118" r="24" fill="#fff" stroke="#b9965f" stroke-width="4"/>
+    <path d="M232,118 V103 M232,118 l11,7" stroke="#33291f" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="232" cy="118" r="2.4" fill="#33291f"/>
+    <!-- poster -->
+    <rect x="748" y="88" width="60" height="74" rx="4" fill="#3a2a1c" opacity=".1"/>
+    <rect x="746" y="86" width="60" height="74" rx="4" fill="#f4d35e" stroke="#d9b94a" stroke-width="2"/>
+    <circle cx="776" cy="112" r="13" fill="none" stroke="#7a5e1e" stroke-width="2.4"/>
+    <circle cx="771" cy="109" r="1.8" fill="#7a5e1e"/><circle cx="781" cy="109" r="1.8" fill="#7a5e1e"/>
+    <path d="M770,116 q6,5 12,0" stroke="#7a5e1e" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="776" y="150" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#7a5e1e" text-anchor="middle">Top!</text>
+    <!-- plant -->
+    <g transform="translate(70,470)">
+      <ellipse cx="0" cy="48" rx="27" ry="7" fill="#3a2a1c" opacity=".18" filter="url(#soft)"/>
+      <path d="M0,18 Q-26,-4 -16,-30 Q-4,-14 0,18" fill="#5f9e54"/>
+      <path d="M0,18 Q26,-2 18,-30 Q4,-12 0,18" fill="#6fae62"/>
+      <path d="M0,18 Q2,-20 0,-40 Q-2,-20 0,18" fill="#7cbb6e"/>
+      <path d="M-16,18 L16,18 L12,46 L-12,46 Z" fill="#c1684a"/><rect x="-18" y="12" width="36" height="9" rx="3" fill="#d2745a"/>
+      <rect x="-18" y="12" width="36" height="4" rx="2" fill="#e08a6f"/>
+    </g>
+  `;
+  const figs=studs.map(s=>figure(s,s.idx)).join('');
+  const vig=`<rect x="0" y="0" width="1000" height="640" fill="url(#vig)" pointer-events="none"/>`;
+  return `<svg viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Geïllustreerde klas">${bg}${figs}${vig}</svg>`;
+}
+
+/* ============================================================
+   FLOW
+   ============================================================ */
+function startTraining(){
+  Audio.start(); Audio.show();
+  sceneIdx=0; results=[];
+  switchScreen('stage');
+  loadScene();
+}
+
+function renderProgress(){
+  const p=$('progress'); p.innerHTML='';
+  SCENES.forEach((s,i)=>{ const d=document.createElement('div'); d.className='dot'+(i<sceneIdx?' done':i===sceneIdx?' on':''); p.appendChild(d); });
+}
+
+function loadScene(){
+  curScene=SCENES[sceneIdx];
+  const studs=prepScene(curScene);
+  curScene._studs=studs;
+  flagged=new Set();
+  phase='scan';
+  $('sceneTitle').textContent=curScene.title;
+  $('sceneSub').textContent=curScene.sub;
+  renderProgress();
+  $('reviewArea').innerHTML='';
+  $('sceneSvg').innerHTML=buildSceneSVG(curScene,studs,'play');
+  const frame=$('sceneFrame'); frame.className='scene-frame scanning';
+  // bind hits
+  studs.forEach(s=>{
+    const g=$('sceneSvg').querySelector(`.stu[data-idx="${s.idx}"]`);
+    g.querySelector('.hit').addEventListener('click',()=>toggleFlag(s.idx,g));
+  });
+  // phase bar
+  $('phaseIcon').textContent='🔍';
+  $('phaseTitle').textContent='Scan de klas';
+  $('phaseDesc').textContent='Tik op alles wat jouw aandacht nodig heeft.';
+  $('foundCount').style.display='inline-block'; updateFound();
+  $('timer').style.display='block';
+  // actions
+  $('stageActions').innerHTML='<button class="btn primary" id="doneScan">Ik ben klaar met scannen →</button>';
+  $('doneScan').addEventListener('click',endScan);
+  // timer
+  startTimer(curScene.scanTime);
+  toast('Scan de klas — wat heeft je aandacht nodig?');
+}
+
+function toggleFlag(idx,g){
+  if(phase!=='scan')return;
+  if(flagged.has(idx)){ flagged.delete(idx); g.classList.remove('flagged'); }
+  else { flagged.add(idx); g.classList.add('flagged','ping'); setTimeout(()=>g.classList.remove('ping'),600); Audio.fx('click'); }
+  updateFound();
+}
+function updateFound(){ $('foundCount').textContent=flagged.size+' gemarkeerd'; }
+
+function startTimer(sec){
+  timeLeft=sec; $('timerNum').textContent=sec;
+  $('timerArc').style.strokeDashoffset='0';
+  clearInterval(timerT);
+  const total=sec;
+  timerT=setInterval(()=>{
+    timeLeft-=0.1;
+    if(timeLeft<=0){ timeLeft=0; clearInterval(timerT); endScan(); }
+    $('timerNum').textContent=Math.ceil(timeLeft);
+    $('timerArc').style.strokeDashoffset=(ARC*(1-timeLeft/total)).toFixed(1);
+  },100);
+}
+
+function endScan(){
+  if(phase!=='scan')return;
+  phase='review';
+  clearInterval(timerT);
+  const studs=curScene._studs;
+  // compute issues present (unique issue ids)
+  const issueGroups={};
+  studs.forEach(s=>{ if(s.issue){ (issueGroups[s.issue]=issueGroups[s.issue]||[]).push(s.idx); } });
+  const issueIds=Object.keys(issueGroups);
+  // caught if any member flagged
+  const caughtMap={};
+  issueIds.forEach(id=>{ caughtMap[id]=issueGroups[id].some(i=>flagged.has(i)); });
+  // false positives: flagged students that have no issue
+  let fp=0; flagged.forEach(i=>{ if(!studs[i].issue)fp++; });
+  curResults={issueGroups,issueIds,caughtMap,fp,responses:{}};
+  curIssueList=issueIds; curIssuePtr=0;
+  // UI: reveal phase
+  $('timer').style.display='none'; $('foundCount').style.display='none';
+  $('phaseIcon').textContent='🧭';
+  $('phaseTitle').textContent='Diagnose & reactie';
+  $('phaseDesc').textContent='Per situatie: wat is de beste reactie?';
+  $('stageActions').innerHTML='';
+  $('sceneFrame').className='scene-frame review-mode';
+  Audio.fx('ding');
+  reviewNext();
+}
+
+function reviewNext(){
+  const area=$('reviewArea');
+  // clear spotlight
+  $('sceneSvg').querySelectorAll('.stu').forEach(g=>g.classList.remove('spot'));
+  if(curIssuePtr>=curIssueList.length){ sceneScore(); return; }
+  const id=curIssueList[curIssuePtr];
+  const grp=curResults.issueGroups[id];
+  grp.forEach(i=>$('sceneSvg').querySelector(`.stu[data-idx="${i}"]`).classList.add('spot'));
+  const iss=ISSUES[id];
+  const caught=curResults.caughtMap[id];
+  area.innerHTML=`
+    <div class="diag-card">
+      <span class="spot-status ${caught?'caught':'missed'}">${caught?'✓ Je had dit gespot':'✗ Dit zag je over het hoofd'}</span>
+      <div class="dl">${iss.icon} Situatie ${curIssuePtr+1} van ${curIssueList.length}</div>
+      <h3>${iss.label}</h3>
+      <div class="desc">${iss.desc}</div>
+      <div class="resp" id="resp"></div>
+      <div id="fbSlot"></div>
+      <div class="diag-next" id="nextSlot"></div>
+    </div>`;
+  const respEl=$('resp');
+  // shuffle responses
+  const order=iss.responses.map((r,i)=>i); for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  order.forEach(oi=>{
+    const r=iss.responses[oi];
+    const b=document.createElement('button'); b.className=r.q; b.innerHTML=r.t;
+    b.addEventListener('click',()=>chooseResp(id,oi,b,respEl,iss));
+    respEl.appendChild(b);
+  });
+  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+
+const QTAG={best:{t:'STERK',c:'#22a866'},ok:{t:'Oké',c:'#e8a52b'},poor:{t:'ZWAK',c:'#e0533c'}};
+function chooseResp(id,oi,btn,respEl,iss){
+  const r=iss.responses[oi];
+  curResults.responses[id]={q:r.q};
+  [...respEl.children].forEach(b=>{ b.disabled=true; b.classList.add('reveal'); });
+  // tag each button by its quality class
+  [...respEl.children].forEach(b=>{
+    const q=b.classList.contains('best')?'best':b.classList.contains('ok')?'ok':'poor';
+    if(!b.querySelector('.tagq')){ const tag=document.createElement('span'); tag.className='tagq'; tag.style.background=QTAG[q].c+'22'; tag.style.color=QTAG[q].c; tag.textContent=QTAG[q].t; b.prepend(tag); }
+  });
+  btn.classList.add('chosen');
+  Audio.fx(r.q==='best'?'great':r.q==='ok'?'good':'bad');
+  $('fbSlot').innerHTML=`<div class="feedback"><div class="fl">${r.q==='best'?'Sterke keuze':r.q==='ok'?'Werkbaar, maar het kan beter':'Dit pakt vaak verkeerd uit'}</div><div class="fb">${r.fb}</div><div class="cite">${r.cite}</div></div>`;
+  $('nextSlot').innerHTML=`<button class="btn primary" id="nextBtn">${curIssuePtr+1>=curIssueList.length?'Rond deze klas af':'Volgende situatie'} →</button>`;
+  $('nextBtn').addEventListener('click',()=>{ curIssuePtr++; reviewNext(); });
+}
+
+function sceneScore(){
+  // tally
+  const total=curResults.issueIds.length;
+  const caught=curResults.issueIds.filter(id=>curResults.caughtMap[id]).length;
+  const fp=curResults.fp;
+  // response quality
+  let qpts=0,qmax=0; curResults.issueIds.forEach(id=>{ qmax+=2; const q=curResults.responses[id]; qpts+= q? (q.q==='best'?2:q.q==='ok'?1:0):0; });
+  const noticing=Math.max(0,Math.round((caught/total)*100 - fp*12));
+  const respQ=qmax?Math.round((qpts/qmax)*100):0;
+  results.push({title:curScene.title, total, caught, fp, noticing, respQ, studs:curScene._studs, caughtMap:curResults.caughtMap, issueGroups:curResults.issueGroups, flagged:new Set(flagged)});
+  // recap visual on the scene
+  markRecap();
+  const area=$('reviewArea');
+  area.innerHTML=`
+    <div class="diag-card sscore">
+      <div class="big">${noticing}%</div>
+      <div class="lbl">withitness in deze klas</div>
+      <div class="row">
+        <div class="it"><b>${caught}/${total}</b>gespot</div>
+        <div class="it"><b>${fp}</b>vals alarm</div>
+        <div class="it"><b>${respQ}%</b>reactiekwaliteit</div>
+      </div>
+      <button class="btn primary" id="contBtn">${sceneIdx+1>=SCENES.length?'Naar je eindrapport →':'Volgende klas →'}</button>
+    </div>`;
+  $('contBtn').addEventListener('click',()=>{
+    if(sceneIdx+1>=SCENES.length){ debrief(); }
+    else { sceneIdx++; loadScene(); window.scrollTo({top:0,behavior:'smooth'}); }
+  });
+  Audio.fx(noticing>=70?'great':'good');
+  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+
+function markRecap(){
+  const frame=$('sceneFrame'); frame.className='scene-frame recap';
+  $('sceneSvg').querySelectorAll('.stu').forEach(g=>g.classList.remove('spot'));
+  const studs=curScene._studs;
+  studs.forEach(s=>{
+    const g=$('sceneSvg').querySelector(`.stu[data-idx="${s.idx}"]`);
+    const out=g.querySelector('.outcome');
+    if(s.issue){
+      const caught=curResults.caughtMap[s.issue];
+      out.setAttribute('stroke', caught?'#22a866':'#e0533c');
+      out.setAttribute('stroke-dasharray', caught?'':'');
+    } else if(flagged.has(s.idx)){
+      out.setAttribute('stroke','#e8a52b'); // false positive
+    } else {
+      out.setAttribute('stroke','transparent');
+    }
+  });
+}
+
+/* ============================================================
+   DEBRIEF
+   ============================================================ */
+function debrief(){
+  const avgNo=Math.round(results.reduce((a,r)=>a+r.noticing,0)/results.length);
+  const avgRq=Math.round(results.reduce((a,r)=>a+r.respQ,0)/results.length);
+  const totalIssues=results.reduce((a,r)=>a+r.total,0);
+  const totalCaught=results.reduce((a,r)=>a+r.caught,0);
+  const totalFp=results.reduce((a,r)=>a+r.fp,0);
+  const overall=Math.round((avgNo*0.55+avgRq*0.45));
+  const grade= overall>=80?{g:'Uitmuntend',c:'#22a866'}:overall>=65?{g:'Sterk',c:'#0e9aa0'}:overall>=50?{g:'Voldoende',c:'#e8a52b'}:{g:'In ontwikkeling',c:'#e0533c'};
+
+  // thumbnails with recap rings
+  const thumbs=results.map((r,i)=>{
+    const svg=buildSceneSVG(SCENES[i],r.studs,'recap');
+    // inject outcome colors by wrapping: easier to post-process via DOM after insert
+    return `<div class="thumb"><div class="tsvg" data-i="${i}">${svg}</div><div class="cap"><b>${r.noticing}%</b> · ${r.title}</div></div>`;
+  }).join('');
+
+  const tips=buildTips({avgNo,avgRq,totalFp,results});
+  const wa="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20praten%20over%20de%20withitness-trainer.";
+
+  $('debrief').innerHTML=`
+    <div class="kicker" style="color:var(--teal-d)">Je training zit erop</div>
+    <h2>Eindrapport</h2>
+    <span class="deb-grade" style="background:${grade.c}1f;color:${grade.c}">${grade.g} · ${overall}%</span>
+    <div class="deb-scores">
+      <div class="ds"><div class="dl">Withitness</div><div class="dv" style="color:var(--teal-d)">${avgNo}%</div><div class="dsub">je blik voor signalen</div></div>
+      <div class="ds"><div class="dl">Reactiekwaliteit</div><div class="dv" style="color:var(--amber)">${avgRq}%</div><div class="dsub">je interventiekeuzes</div></div>
+      <div class="ds"><div class="dl">Gespot</div><div class="dv" style="color:var(--green)">${totalCaught}/${totalIssues}</div><div class="dsub">situaties opgemerkt</div></div>
+      <div class="ds"><div class="dl">Vals alarm</div><div class="dv" style="color:${totalFp?'var(--red)':'var(--green)'}">${totalFp}</div><div class="dsub">onnodig ingegrepen</div></div>
+    </div>
+
+    <div class="recap">
+      <h3>Je withitness-heatmap</h3>
+      <div class="rsub">Per klas: wat je zag, miste of onnodig markeerde.</div>
+      <div class="thumbs">${thumbs}</div>
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:#22a866"></span> gespot</span>
+        <span class="lg"><span class="sw" style="background:#e0533c"></span> gemist</span>
+        <span class="lg"><span class="sw" style="background:#e8a52b"></span> vals alarm</span>
+      </div>
+    </div>
+
+    <div class="tips">${tips}</div>
+
+    <div class="cta">
+      <div class="ck">Voor jouw situatie</div>
+      <h3>Train op de klas die jíj voor je hebt</h3>
+      <p>Deze trainer is een voorbeeld. Ik bouw hem op maat: jouw vakcontext, jouw lastige klasmomenten, jouw schoolafspraken over reageren — als nascholing voor een heel team of als oefening voor studenten op de pabo of lerarenopleiding.</p>
+      <div class="cta-row">
+        <a class="wa" href="${wa}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.04c-.24.68-1.42 1.31-1.95 1.36-.5.05-1.13.07-1.83-.11-.42-.13-.96-.31-1.66-.61-2.92-1.26-4.82-4.2-4.97-4.39-.15-.2-1.18-1.57-1.18-3 0-1.42.74-2.12 1.01-2.41.27-.29.59-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.59.83 2.04.9 2.19.07.15.12.32.02.51-.1.2-.15.32-.29.49-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.35 1.45.29.15.46.12.63-.07.17-.2.73-.85.93-1.14.2-.29.39-.24.66-.15.27.1 1.71.81 2 .96.29.15.49.22.56.34.07.12.07.71-.17 1.39z"/></svg>Bouw dit voor mijn situatie</a>
+        <button class="btn ghost" id="replayBtn">Opnieuw trainen</button>
+      </div>
+      <p class="cta-sign">— <b>Onderwijs Digitaliseren</b> · onderwijstools die blijven hangen</p>
+    </div>`;
+  switchScreen('debrief');
+  // post-process thumbnails to color outcome rings
+  results.forEach((r,i)=>{
+    const host=document.querySelector(`.tsvg[data-i="${i}"]`);
+    r.studs.forEach(s=>{
+      const g=host.querySelector(`.stu[data-idx="${s.idx}"]`); if(!g)return;
+      g.style.opacity='1';
+      const out=g.querySelector('.outcome'); out.style.opacity='1';
+      if(s.issue){ out.setAttribute('stroke', r.caughtMap[s.issue]?'#22a866':'#e0533c'); }
+      else if(r.flagged.has(s.idx)){ out.setAttribute('stroke','#e8a52b'); }
+      else out.setAttribute('stroke','transparent');
+    });
+  });
+  $('replayBtn').addEventListener('click',()=>{ switchScreen('intro'); window.scrollTo({top:0,behavior:'smooth'}); });
+  Audio.fx(overall>=65?'great':'good');
+}
+
+function buildTips(x){
+  const t=[];
+  if(x.avgNo>=80) t.push(['good','Scherpe blik','Je spotte vrijwel alles. Dit is withitness op niveau — leerlingen merken dat jij weet wat er speelt, en dat alleen al houdt de rust erin.']);
+  else if(x.avgNo<55) t.push(['warn','Verbreed je scan','Je miste een aantal signalen. Oefen met systematisch rondkijken: scan bewust ook de hoeken en de achterste rij, niet alleen het midden.']);
+  else t.push(['',' Een degelijke basis','Je ziet veel, maar niet alles. De winst zit in de subtiele signalen: de stille dromer, de aarzelende hand.']);
+
+  if(x.totalFp>=3) t.push(['warn','Pas op voor vals alarm','Je greep een paar keer in waar het niet nodig was. Te veel corrigeren ondermijnt de werksfeer net zo goed als te weinig. Laat rusten wat goed gaat.']);
+  else if(x.totalFp===0 && x.avgNo>=55) t.push(['good','Goed onderscheid','Je liet de werkende leerlingen met rust én zag wat er wél toe deed. Withitness is óók weten wanneer je níét moet ingrijpen.']);
+
+  if(x.avgRq>=80) t.push(['good','Sterke interventies','Je koos consequent voor de minst ingrijpende, meest effectieve reactie — nabijheid en non-verbale signalen boven publieke correctie. Precies de lijn van Kounin en Marzano.']);
+  else if(x.avgRq<55) t.push(['warn','Kies lichter en gerichter','Je reactie was soms zwaarder dan nodig. Vuistregel: het laagste niveau dat werkt. Eerst non-verbaal en nabijheid, pas daarna woorden — en zelden publiek.']);
+  else t.push(['','Reageer nóg gerichter','Je keuzes zijn redelijk. De volgende stap: vaker de subtiele, niet-onderbrekende interventie kiezen die de les laat doorlopen.']);
+
+  return t.slice(0,4).map(([k,h,b])=>`<div class="tip ${k}"><div class="th">${h}</div><div class="tb">${b}</div></div>`).join('');
+}
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function switchScreen(id){ ['intro','stage','debrief'].forEach(s=>$(s).classList.toggle('active',s===id)); }
+let toastT;
+function toast(txt){ const el=$('toast'); el.textContent=txt; el.style.opacity='1'; clearTimeout(toastT); toastT=setTimeout(()=>el.style.opacity='0',3800); }
+
+/* ---- living hero on the front page (separate preview scene, no spoilers) ---- */
+const HERO_SCENE={cols:4, students:[
+  {row:0,col:0,state:'work'},
+  {row:0,col:1,state:'hand',issue:'hand'},
+  {row:0,col:2,state:'gaze',issue:'gaze'},
+  {row:0,col:3,state:'work'},
+  {row:1,col:0,state:'whisper',issue:'whisper',lean:1},
+  {row:1,col:1,state:'whisper',issue:'whisper',lean:-1},
+  {row:1,col:2,state:'work'},
+  {row:1,col:3,state:'phone',issue:'phone'},
+  {row:2,col:0,state:'work'},
+  {row:2,col:1,state:'sleep',issue:'sleep'},
+  {row:2,col:2,state:'read'},
+  {row:2,col:3,state:'work'}
+]};
+function buildHero(){
+  const studs=prepScene(HERO_SCENE);
+  const host=$('heroScene');
+  host.innerHTML=buildSceneSVG(HERO_SCENE,studs,'play');
+  // gently pulse a few troublemakers to hint the mechanic
+  const tease=['phone','gaze','whisper']; let used=new Set();
+  [...host.querySelectorAll('.stu')].forEach(g=>{
+    const id=g.getAttribute('data-issue');
+    if(id && tease.includes(id) && !used.has(id)){ g.classList.add('tease'); used.add(id); }
+  });
+}
+
+$('startBtn').addEventListener('click',(e)=>{ e.stopPropagation(); startTraining(); });
+$('hero').addEventListener('click',startTraining);
+buildHero();
+</script>
+</body>
+</html>

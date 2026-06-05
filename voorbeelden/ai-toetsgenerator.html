@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toetsgenerator · meerkeuze naar Canvas QTI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Spline+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EBEEF4; --surface:#FFFFFF; --surface-2:#F6F7FB;
+    --ink:#15171E; --ink-soft:#4B5160; --muted:#868C9C; --faint:#AEB4C2;
+    --line:#E3E7EF; --line-2:#D2D8E4;
+    --primary:#3B43D6; --primary-deep:#2A31AE; --primary-soft:#E7E8FC; --primary-tint:#F2F3FE;
+    --accent:#FFC02E; --accent-soft:#FFF0C7; --accent-deep:#B47C00;
+    --green:#1FA463; --green-soft:#DEF3E8; --red:#E03A2F; --red-soft:#FBE3E0;
+    --blue:#2F6DB5; --blue-soft:#E4EDF8; --purple:#7A52B3; --purple-soft:#ECE4F7;
+    --display:'Bricolage Grotesque',system-ui,sans-serif;
+    --sans:'Spline Sans',system-ui,sans-serif;
+    --mono:'Spline Sans Mono',ui-monospace,monospace;
+    --sh-sm:0 1px 2px rgba(21,23,30,.05);
+    --sh:0 2px 8px rgba(21,23,30,.05),0 16px 36px -18px rgba(21,23,30,.22);
+    --sh-lg:0 6px 16px rgba(21,23,30,.08),0 30px 60px -22px rgba(40,49,174,.3);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;min-height:100vh;
+    background-image:radial-gradient(rgba(59,67,214,.07) 1.1px,transparent 1.1px);
+    background-size:22px 22px;
+  }
+  ::selection{background:var(--accent-soft)}
+  button{font-family:inherit;cursor:pointer}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-thumb{background:var(--line-2);border:3px solid var(--bg);border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--faint)}
+  .shell{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* logo mark */
+  .logo-mark{display:block;flex:0 0 auto}
+
+  /* HEADER */
+  header.top{position:sticky;top:0;z-index:30;background:rgba(235,238,244,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top-in{height:66px;display:flex;align-items:center;gap:14px}
+  .wm{display:flex;align-items:center;gap:12px;text-decoration:none}
+  .wm .wtxt{display:flex;flex-direction:column;line-height:1.04}
+  .wm .wtxt b{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.3px;color:var(--ink)}
+  .wm .wtxt span{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.2px}
+  .top-sp{flex:1}
+  .top-link{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;padding:8px 13px;border-radius:10px;border:1px solid transparent;background:none}
+  .top-link:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .top-logo{display:flex;align-items:center;padding-left:6px;margin-left:2px;border-left:1px solid var(--line)}
+  .top-logo img{height:24px;width:auto;opacity:.85;display:block}
+  .top-logo .lf{font-family:var(--display);font-weight:800;color:var(--primary);display:none;font-size:16px}
+
+  /* HERO */
+  .hero{padding:34px 0 8px}
+  .hero-in{background:linear-gradient(135deg,var(--primary) 0%,#4A52E8 55%,#5A62F0 100%);border-radius:24px;padding:34px 36px;display:flex;align-items:center;gap:30px;flex-wrap:wrap;box-shadow:var(--sh-lg);position:relative;overflow:hidden}
+  .hero-in:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1.2px,transparent 1.2px);background-size:20px 20px;opacity:.6}
+  .hero-txt{flex:1;min-width:280px;position:relative}
+  .kicker{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:2px;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:4px 11px;border-radius:99px;margin-bottom:14px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:38px;line-height:1.06;letter-spacing:-.8px;color:#fff;max-width:16ch}
+  .hero h1 .hl{position:relative;white-space:nowrap}
+  .hero h1 .hl:after{content:"";position:absolute;left:-2px;right:-2px;bottom:4px;height:12px;background:var(--accent);border-radius:3px;z-index:-1;transform:rotate(-.6deg)}
+  .hero p{margin-top:13px;color:rgba(255,255,255,.9);font-size:16px;max-width:50ch}
+  .tracker{list-style:none;display:flex;flex-direction:column;gap:13px;position:relative;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:18px 20px;min-width:200px}
+  .tracker li{display:flex;align-items:center;gap:12px;font-weight:600;color:#fff;font-size:14.5px}
+  .tracker .tn{width:28px;height:28px;border-radius:9px;background:#fff;color:var(--primary);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:14px;flex:0 0 auto}
+  .tracker li:nth-child(2) .tn,.tracker li:nth-child(3) .tn{background:rgba(255,255,255,.22);color:#fff}
+
+  /* CONVERTER */
+  .converter{padding:26px 0 0}
+  .conv-grid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px;align-items:stretch}
+  .pane{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);display:flex;flex-direction:column;min-width:0}
+  .pane-head{display:flex;align-items:center;gap:11px;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .pane-head .ph-step{width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13px;flex:0 0 auto}
+  .pane-head h2{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.2px}
+  .pane-head .mini-btn{margin-left:auto}
+  .pane-head .vbadge{margin-left:auto}
+  .pane-body{padding:18px 20px;flex:1;display:flex;flex-direction:column}
+
+  textarea#src{width:100%;flex:1;min-height:420px;border:1px solid var(--line-2);background:var(--surface-2);border-radius:14px;padding:15px 17px;font-family:var(--mono);font-size:13.5px;line-height:1.75;color:var(--ink);resize:vertical;outline:none}
+  textarea#src:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px var(--primary-tint)}
+  textarea#src::placeholder{color:var(--faint)}
+  .ta-foot{display:flex;align-items:center;gap:9px;margin-top:13px;flex-wrap:wrap}
+  .mini-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 13px;font-size:13px;font-weight:600;color:var(--ink-soft);transition:.13s}
+  .mini-btn:hover{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-tint)}
+  .mini-btn.ghost{border-color:transparent;background:transparent}
+  .mini-btn.ghost:hover{background:var(--surface-2);color:var(--ink)}
+  .ta-foot .sp{flex:1}
+  .ta-foot .stat{font-size:12.5px;color:var(--muted)}
+  .ex-wrap{position:relative}
+  .ex-menu{position:absolute;bottom:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh-lg);padding:6px;min-width:210px;display:none;z-index:10}
+  .ex-menu.show{display:block;animation:pop .14s}
+  .ex-menu button{display:flex;width:100%;align-items:center;gap:10px;border:none;background:none;padding:9px 11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);text-align:left}
+  .ex-menu button:hover{background:var(--primary-tint);color:var(--primary-deep)}
+
+  .conv-arrow{display:flex;align-items:center;justify-content:center}
+  .conv-arrow span{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#3a2c00;display:grid;place-items:center;font-size:19px;font-weight:700;box-shadow:0 6px 16px -5px rgba(255,192,46,.8);border:3px solid var(--bg)}
+
+  .res-body{min-height:420px}
+
+  .vbadge{display:none;align-items:center;gap:7px;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:99px}
+  .vbadge.ok{background:var(--green-soft);color:#147a47;display:inline-flex}
+  .vbadge.bad{background:var(--red-soft);color:var(--red);display:inline-flex}
+
+  /* empty */
+  .empty{text-align:center;padding:24px 12px 30px}
+  .empty .ill{width:84px;height:84px;margin:0 auto 18px;border-radius:22px;background:linear-gradient(140deg,var(--primary-soft),var(--accent-soft));display:grid;place-items:center;font-size:36px;transform:rotate(-4deg);box-shadow:var(--sh)}
+  .empty h3{font-family:var(--display);font-weight:600;font-size:21px;margin-bottom:7px}
+  .empty p{color:var(--ink-soft);max-width:42ch;margin:0 auto 18px}
+  .empty .demo-b{border:1px solid var(--line-2);background:var(--surface);border-radius:11px;padding:9px 16px;font-size:13.5px;font-weight:600;color:var(--ink-soft);display:inline-flex;gap:7px;align-items:center}
+  .empty .demo-b:hover{border-color:var(--primary);color:var(--primary-deep);background:var(--primary-tint)}
+
+  /* result */
+  .qtitle{font-family:var(--display);font-weight:600;font-size:20px;margin-bottom:2px}
+  .qdesc{color:var(--ink-soft);margin-bottom:14px;font-size:14px}
+  .ov-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .ov-meta .tcount{background:var(--primary);color:#fff;padding:4px 12px;border-radius:99px;font-weight:700;font-size:12.5px}
+  .typetag{padding:3px 9px;border-radius:99px;font-size:11.5px;font-weight:600}
+  .warns{margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--accent-soft)}
+  .warns.errs{border-color:var(--red-soft)}
+  .warns .wh{background:var(--accent-soft);color:var(--accent-deep);padding:8px 13px;font-size:12.5px;font-weight:700}
+  .warns.errs .wh{background:var(--red-soft);color:var(--red)}
+  .warnline{padding:7px 13px;font-size:12.5px;border-top:1px solid #f3e6c4;display:flex;gap:9px}
+  .warns.errs .warnline{border-top-color:#f3d4ce}
+  .warnline.err{color:var(--red)} .warnline.warn{color:var(--accent-deep)}
+
+  .qc{border:1px solid var(--line);border-radius:14px;margin-bottom:13px;overflow:hidden;background:#fff;animation:qpop .35s cubic-bezier(.2,.7,.3,1) backwards}
+  .qc.invalid{border-color:var(--red-soft)}
+  .qc.locked{opacity:.92;background:var(--surface-2)}
+  .qc-h{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .qc-h .qn{width:25px;height:25px;border-radius:8px;background:#fff;border:1px solid var(--line-2);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--ink-soft);flex:0 0 auto}
+  .qc-h .qtype{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px}
+  .qc-h .qstatus{margin-left:auto;font-size:11.5px;font-weight:600}
+  .qc-h .qstatus.ok{color:var(--green)} .qc-h .qstatus.bad{color:var(--red)}
+  .qc-b{padding:13px 16px}
+  .qtext{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:10px}
+  .opts{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .opts li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:9px;background:var(--surface-2)}
+  .opts li.cor{background:var(--green-soft);color:#136b3f;font-weight:600}
+  .opts li .ob{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--line-2);flex:0 0 auto;display:grid;place-items:center;font-size:11px;color:transparent;margin-top:1px}
+  .opts li.cor .ob{background:var(--green);border-color:var(--green);color:#fff}
+  .opts li.radio .ob{border-radius:50%}
+  .ansline{font-size:13.5px;background:var(--surface-2);border-radius:9px;padding:9px 12px;display:flex;gap:9px;align-items:center}
+  .ansline .lbl{font-weight:600;color:var(--muted)}
+  .ansline .val{font-weight:600;color:var(--primary-deep)}
+  .ansline.muted .val{color:var(--ink-soft);font-weight:500}
+
+  .export{margin-top:18px;border:1px solid var(--primary-soft);background:var(--primary-tint);border-radius:16px;padding:18px}
+  .export h3{font-family:var(--display);font-weight:600;font-size:18px;display:flex;align-items:center;gap:9px}
+  .export p{font-size:13.5px;color:var(--ink-soft);margin:4px 0 14px}
+  .export .row{display:flex;gap:11px;flex-wrap:wrap}
+  .dl-zip{flex:1;min-width:200px;border:none;background:var(--primary);color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px -6px rgba(59,67,214,.6);transition:.15s}
+  .dl-zip:hover{background:var(--primary-deep);transform:translateY(-1px)}
+  .dl-zip:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .dl-txt{border:1px solid var(--line-2);background:#fff;border-radius:12px;padding:14px 16px;font-size:13.5px;font-weight:600;color:var(--ink-soft);display:inline-flex;align-items:center;gap:8px}
+  .dl-txt:hover{border-color:var(--primary);color:var(--primary-deep)}
+  details.howto{margin-top:14px;border-top:1px solid var(--primary-soft);padding-top:12px}
+  details.howto summary{font-size:13.5px;font-weight:600;color:var(--primary-deep);cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px}
+  details.howto summary::-webkit-details-marker{display:none}
+  details.howto summary .tw{transition:.2s}
+  details.howto[open] summary .tw{transform:rotate(90deg)}
+  details.howto ol{margin:11px 0 0 4px;padding-left:20px;font-size:13.5px;color:var(--ink-soft);line-height:1.75}
+  details.howto code{background:#fff;border:1px solid var(--primary-soft);border-radius:6px;padding:1px 6px;font-size:12.5px;font-family:var(--mono);font-weight:500;color:var(--primary-deep)}
+
+  /* EXPLAINER */
+  .explainer{padding:46px 0 0}
+  .explainer .eh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .explainer h2{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.4px}
+  .explainer .esub{color:var(--ink-soft);font-size:15px;margin-bottom:20px;max-width:72ch}
+  .explainer .esub a{color:var(--primary-deep);font-weight:600;cursor:pointer}
+  .ex-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .ex-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--sh)}
+  .ex-card .ech{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .ex-card .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+  .ex-card h3{font-family:var(--display);font-weight:600;font-size:17px}
+  .ex-card .lead{font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:13px}
+  .ex-code{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 15px;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--ink);white-space:pre-wrap;overflow-x:auto}
+  .ex-code .star{color:var(--accent-deep);font-weight:700;background:var(--accent-soft);border-radius:4px;padding:0 3px}
+  .ex-card .note{display:flex;gap:8px;align-items:flex-start;margin-top:13px;font-size:12.5px;color:var(--ink-soft);background:var(--primary-tint);border:1px solid var(--primary-soft);border-radius:10px;padding:10px 12px}
+  .ex-card .note b{color:var(--primary-deep)}
+  .ex-card .note .ni{color:var(--primary);flex:0 0 auto;font-weight:700}
+  .ex-callout{margin-top:20px;background:var(--accent-soft);border:1px solid #f0d690;border-radius:16px;padding:18px 20px;display:flex;gap:15px;align-items:flex-start}
+  .ex-callout .ci{font-size:24px;flex:0 0 auto}
+  .ex-callout b{color:#7a5500;font-family:var(--display);font-weight:600;font-size:15.5px}
+  .ex-callout p{font-size:13.5px;color:#6b4e10;margin-top:4px}
+  .ex-callout a{color:var(--primary-deep);font-weight:700;text-decoration:none;white-space:nowrap}
+  .ex-callout a:hover{text-decoration:underline}
+
+  /* FOOTER */
+  .foot{padding:48px 0 36px}
+  .foot-card{background:var(--ink);color:#EBEEF4;border-radius:22px;padding:30px 34px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:var(--sh-lg)}
+  .foot-card .ft{flex:1;min-width:260px}
+  .foot-card h3{font-family:var(--display);font-weight:600;font-size:23px}
+  .foot-card p{color:#A7AEBF;font-size:14.5px;margin-top:6px;max-width:54ch}
+  .foot-cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#3a2c00;text-decoration:none;border-radius:13px;padding:14px 22px;font-size:15px;font-weight:700;box-shadow:0 8px 20px -8px rgba(255,192,46,.7);transition:.15s;white-space:nowrap}
+  .foot-cta:hover{transform:translateY(-2px)}
+  .foot-fine{text-align:center;color:var(--muted);font-size:12.5px;margin-top:22px}
+
+  /* toast */
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(18px);background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:13px;z-index:80;opacity:0;pointer-events:none;transition:.28s;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .tk{color:#62e29c}
+
+  /* modal */
+  .ov-mask{position:fixed;inset:0;background:rgba(21,23,30,.5);backdrop-filter:blur(4px);z-index:90;display:none;align-items:flex-start;justify-content:center;padding:6vh 20px}
+  .ov-mask.show{display:flex;animation:fade .15s}
+  .modal{background:var(--surface);border-radius:18px;max-width:660px;width:100%;max-height:84vh;display:flex;flex-direction:column;box-shadow:var(--sh-lg);animation:qpop .25s cubic-bezier(.2,.7,.3,1)}
+  .modal-h{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+  .modal-h h3{font-family:var(--display);font-weight:600;font-size:19px}
+  .modal-h .mx{margin-left:auto;border:none;background:var(--surface-2);width:32px;height:32px;border-radius:9px;font-size:17px;color:var(--ink-soft)}
+  .modal-h .mx:hover{background:var(--line)}
+  .modal-b{overflow:auto;padding:20px 22px}
+  .modal-b pre{white-space:pre-wrap;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .modal-f{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .modal-f .cp{border:none;background:var(--primary);color:#fff;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:700;display:inline-flex;gap:8px;align-items:center}
+  .modal-f span{font-size:12px;color:var(--muted)}
+
+  @keyframes qpop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  @media(max-width:900px){
+    .conv-grid{grid-template-columns:1fr}
+    .conv-arrow span{transform:rotate(90deg)}
+    .hero h1{font-size:30px}
+    .hero-in{padding:26px 24px}
+    textarea#src{min-height:280px}
+    .res-body{min-height:auto}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="shell top-in">
+    <a class="wm" href="../onderwijs-digitaliseren.html#voorbeelden">
+      <svg class="logo-mark" width="38" height="38" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="40" height="40" rx="12" fill="#3B43D6"/>
+        <rect x="10.5" y="11.5" width="6" height="6" rx="3" fill="#fff" opacity=".5"/>
+        <rect x="19.5" y="13" width="13" height="3" rx="1.5" fill="#fff" opacity=".5"/>
+        <rect x="8.5" y="18.5" width="27" height="9.5" rx="4.75" fill="#FFC02E"/>
+        <path d="M12 23.4l2.1 2.1 3.6-4.2" stroke="#3B43D6" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="19.5" y="21.7" width="12" height="3" rx="1.5" fill="#2A31AE"/>
+        <rect x="10.5" y="29.5" width="6" height="6" rx="3" fill="#fff" opacity=".5"/>
+        <rect x="19.5" y="31" width="13" height="3" rx="1.5" fill="#fff" opacity=".5"/>
+      </svg>
+      <span class="wtxt"><b>Toetsgenerator</b><span>meerkeuze → Canvas QTI</span></span>
+    </a>
+    <div class="top-sp"></div>
+    <button class="top-link" id="rulesBtn">Opmaak</button>
+    <a class="top-link" href="../onderwijs-digitaliseren.html#voorbeelden">← Voorbeelden</a>
+    <span class="top-logo"><img src="../logo.png" alt="Onderwijs Digitaliseren" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="lf">◆</span></span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="shell">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">CANVAS · QTI 1.2</span>
+        <h1>Van meerkeuzevragen naar een <span class="hl">Canvas-toets</span></h1>
+        <p>Plak je vragen, controleer ze in één oogopslag en download het QTI-bestand. Klaar om te importeren — geen account, geen gedoe.</p>
+      </div>
+      <ol class="tracker">
+        <li><span class="tn">1</span> Plakken</li>
+        <li><span class="tn">2</span> Controleren</li>
+        <li><span class="tn">3</span> Downloaden</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<div class="shell">
+  <main class="converter">
+    <div class="conv-grid">
+
+      <section class="pane">
+        <div class="pane-head"><span class="ph-step">1</span><h2>Plak je vragen</h2><button class="mini-btn ghost" id="rulesBtn2">opmaak</button></div>
+        <div class="pane-body">
+          <textarea id="src" spellcheck="false" placeholder="Quiz title: Mijn toets
+Quiz description: Korte omschrijving
+
+1. Wat is de hoofdstad van Nederland?
+a) Rotterdam
+b) Den Haag
+*c) Amsterdam
+d) Utrecht
+
+2. Hoeveel minuten zitten er in een uur?
+a) 30
+*b) 60
+c) 90
+d) 100
+
+…plak hier je eigen meerkeuzevragen"></textarea>
+          <div class="ta-foot">
+            <div class="ex-wrap">
+              <button class="mini-btn" id="exBtn">📋 Voorbeeld ▾</button>
+              <div class="ex-menu" id="exMenu">
+                <button data-ex="mcAlg">🧠 Algemene kennis</button>
+                <button data-ex="mcBio">🌱 Biologie · Fotosynthese</button>
+              </div>
+            </div>
+            <button class="mini-btn ghost" id="clearBtn">✕ Wissen</button>
+            <span class="sp"></span>
+            <span class="stat" id="srcStat"></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="conv-arrow"><span>→</span></div>
+
+      <section class="pane">
+        <div class="pane-head"><span class="ph-step">2</span><h2>Controle &amp; export</h2><span class="vbadge" id="vBadge"></span></div>
+        <div class="pane-body res-body" id="resBody"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <section class="explainer">
+    <div class="eh"><h2>Zo schrijf je een meerkeuzevraag</h2></div>
+    <p class="esub">Elke vraag begint met een nummer en een punt: <code style="background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:var(--mono);font-size:13px">1. Vraagtekst?</code>. Daaronder komen de antwoordopties. De volledige opmaak staat onder <a id="rulesBtn3">Opmaak meerkeuzevraag</a>.</p>
+    <div class="ex-cards">
+      <div class="ex-card">
+        <div class="ech"><span class="ico" style="background:var(--primary-soft);color:var(--primary-deep)">◉</span><h3>Meerkeuzevraag</h3></div>
+        <p class="lead">Eén juist antwoord. De opties beginnen met kleine letters <b>a) b) c) d)</b>. Zet een sterretje <b>*</b> vlak vóór de letter van het juiste antwoord.</p>
+        <div class="ex-code">1. Wat is de hoofdstad van Nederland?
+a) Rotterdam
+b) Den Haag
+<span class="star">*</span>c) Amsterdam
+d) Utrecht</div>
+        <div class="note"><span class="ni">✓</span><span>Precies <b>één</b> antwoord krijgt een <b>*</b>. Zet zoveel vragen onder elkaar als je wilt — nummer ze gewoon door (1., 2., 3., …).</span></div>
+      </div>
+    </div>
+    <div class="ex-callout">
+      <span class="ci">🧩</span>
+      <div>
+        <b>Dit is de uitgeklede versie — alleen meerkeuze.</b>
+        <p>Wil je ook <b>open vragen</b>, <b>waar/onwaar</b>, <b>numerieke vragen</b>, <b>essays</b> of <b>meerdere juiste antwoorden</b>? Die vraagtypen voegen we op verzoek toe. <a href="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20de%20toetsgenerator%20uitbreiden%20met%20meer%20vraagtypen." target="_blank" rel="noopener">Neem contact op →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div class="foot-card">
+      <div class="ft">
+        <h3>Dit gekoppeld aan jullie eigen leeromgeving?</h3>
+        <p>We bouwen dit soort tools graag op maat in voor jouw opleiding — van vraagtypen tot een directe koppeling met Canvas.</p>
+      </div>
+      <a class="foot-cta" href="https://wa.me/31645646346?text=Hoi%2C%20ik%20wil%20praten%20over%20de%20toets-naar-QTI%20tool." target="_blank" rel="noopener">💬 Neem contact op</a>
+    </div>
+    <div class="foot-fine">Onderwijs Digitaliseren · voorbeeldtool · QTI 1.2 voor Canvas</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="ov-mask" id="rulesMask">
+  <div class="modal">
+    <div class="modal-h"><h3>📑 Opmaak meerkeuzevraag</h3><button class="mx" id="rulesX">×</button></div>
+    <div class="modal-b"><pre id="rulesPre"></pre></div>
+    <div class="modal-f"><button class="cp" id="rulesCopy">⧉ Kopieer regels</button><span>Volg deze opmaak in je tekst, dan zet de tool alles foutloos om.</span></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ====================== CANVAS RULES (reference) ====================== */
+const RULES =
+`Begin altijd met:
+Quiz title: <titel>
+Quiz description: <omschrijving>
+Daarna direct de vragen. Gebruik uitsluitend platte tekst.
+
+MEERKEUZEVRAAG (1 juist antwoord)
+1. Vraagtekst?
+a) Antwoord
+*b) Correct antwoord
+c) Antwoord
+d) Antwoord
+
+Regels:
+- De opties beginnen met kleine letters: a) b) c) d).
+- Exact één antwoord krijgt een sterretje (*) vóór de letter.
+- Nummer alle vragen doorlopend, formaat: "1. Vraagtekst?".
+
+Let op: deze versie verwerkt alleen meerkeuzevragen.
+Open vragen, waar/onwaar, numerieke vragen, essays en
+meerdere-juiste-antwoorden kunnen we op verzoek toevoegen.`;
+
+/* ====================== EXAMPLES ====================== */
+const EXAMPLES={
+  mcAlg:`Quiz title: Algemene kennis
+Quiz description: Voorbeeldtoets met meerkeuzevragen.
+
+1. Wat is de hoofdstad van Nederland?
+a) Rotterdam
+b) Den Haag
+*c) Amsterdam
+d) Utrecht
+
+2. Hoeveel minuten zitten er in een uur?
+a) 30
+*b) 60
+c) 90
+d) 100
+
+3. Welke planeet staat het dichtst bij de zon?
+*a) Mercurius
+b) Venus
+c) Aarde
+d) Mars
+
+4. In welk jaar eindigde de Tweede Wereldoorlog?
+a) 1918
+b) 1939
+*c) 1945
+d) 1950`,
+  mcBio:`Quiz title: Biologie - Fotosynthese
+Quiz description: Meerkeuzevragen over het proces van fotosynthese.
+
+1. Welke stof nemen planten uit de lucht op voor de fotosynthese?
+a) zuurstof
+*b) koolstofdioxide
+c) stikstof
+d) waterstof
+
+2. In welk celonderdeel vindt de fotosynthese plaats?
+a) de celkern
+*b) de bladgroenkorrel
+c) de vacuole
+d) het mitochondrion
+
+3. Hoe heet de groene kleurstof die het licht opvangt?
+*a) chlorofyl
+b) keratine
+c) hemoglobine
+d) melanine
+
+4. Welk gas geven planten af tijdens de fotosynthese?
+a) koolstofdioxide
+b) stikstof
+*c) zuurstof
+d) waterstof`
+};
+
+/* ====================== ENGINE (verified) ====================== */
+const TYPE_LABEL={multiple_choice:"Meerkeuze",multiple_answers:"Meerdere juist",true_false:"Waar/Onwaar",numerical:"Numeriek",short_answer:"Open antwoord",essay:"Essay",file_upload:"Bestandsupload",unknown:"Onbekend"};
+const TYPE_COLOR={
+  multiple_choice:["var(--teal-soft)","var(--teal-deep)"],multiple_answers:["var(--blue-soft)","var(--blue)"],
+  true_false:["var(--green-soft)","#1d7a42"],numerical:["var(--amber-soft)","#8a5d00"],
+  short_answer:["var(--purple-soft)","var(--purple)"],essay:["var(--paper-2)","var(--ink-soft)"],
+  file_upload:["var(--coral-soft)","var(--coral)"],unknown:["var(--red-soft)","var(--red)"]
+};
+function parseNumeric(s){
+  s=(s||"").trim();let m;
+  if(m=s.match(/^\[\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\]$/))return {min:+m[1],max:+m[2],kind:"range",display:s};
+  if((m=s.match(/^(-?[\d.]+)\s*\+-\s*(-?[\d.]+)$/))||(m=s.match(/^(-?[\d.]+)\s*\u00b1\s*(-?[\d.]+)$/)))return {exact:+m[1],margin:+m[2],min:+m[1]-+m[2],max:+m[1]+ +m[2],kind:"tol",display:s};
+  if(m=s.match(/^(-?[\d.]+)$/))return {exact:+m[1],min:+m[1],max:+m[1],kind:"exact",display:s};
+  return {error:true,display:s};
+}
+function parseQuiz(text){
+  const lines=text.replace(/\r\n/g,"\n").split("\n");
+  let title="",description="";const questions=[];let cur=null;
+  const flush=()=>{if(cur){finalize(cur);questions.push(cur);cur=null;}};
+  for(let li=0;li<lines.length;li++){
+    const raw=lines[li],line=raw.trim();let m;
+    if(m=raw.match(/^\s*Quiz title:\s*(.*)$/i)){title=m[1].trim();continue;}
+    if(m=raw.match(/^\s*Quiz description:\s*(.*)$/i)){description=m[1].trim();continue;}
+    if(m=raw.match(/^\s*(\d+)[.)]\s+(.*)$/)){flush();cur={num:+m[1],text:m[2].trim(),opts:[],answers:[],numeric:null,essay:false,file:false,type:null};continue;}
+    if(!cur||line==="")continue;
+    if(m=line.match(/^\[(\*|x|X|\s|)\]\s*(.*)$/)){cur.opts.push({text:m[2].trim(),correct:(m[1].trim().toLowerCase()==="*"||m[1].trim().toLowerCase()==="x")});cur._bracket=true;continue;}
+    if(m=line.match(/^(\*?)\s*([a-zA-Z])[.)]\s*(.*)$/)){cur.opts.push({text:m[3].trim(),correct:m[1]==="*",letter:m[2].toLowerCase()});cur._letter=true;continue;}
+    if(m=line.match(/^=\s*(.*)$/)){cur.numeric=m[1].trim();cur._num=true;continue;}
+    if(/^_{4,}$/.test(line)){cur.essay=true;continue;}
+    if(/^\^{4,}$/.test(line)){cur.file=true;continue;}
+    if(m=line.match(/^\*\s+(.*)$/)){cur.answers.push(m[1].trim());cur._short=true;continue;}
+    cur.text+=" "+line;
+  }
+  flush();
+  return {title,description,questions};
+}
+function finalize(q){
+  if(q._bracket)q.type="multiple_answers";
+  else if(q._num)q.type="numerical";
+  else if(q._letter){const tf=new Set(["waar","onwaar","true","false","juist","onjuist"]);q.type=(q.opts.length===2&&q.opts.every(o=>tf.has(o.text.toLowerCase())))?"true_false":"multiple_choice";}
+  else if(q.essay)q.type="essay";
+  else if(q.file)q.type="file_upload";
+  else if(q._short)q.type="short_answer";
+  else q.type="unknown";
+}
+function validate(quiz){
+  const issues=[];
+  quiz.questions.forEach((q,i)=>{
+    const tag=`Vraag ${i+1}`;q._valid=true;q._unsupported=false;
+    const bad=m=>{issues.push({lvl:"err",msg:m});q._valid=false;};const warn=m=>issues.push({lvl:"warn",msg:m});
+    if(q.type==="unknown"){bad(`${tag}: geen geldig antwoordtype herkend.`);return;}
+    if(q.type!=="multiple_choice"){
+      warn(`${tag}: type \u201c${TYPE_LABEL[q.type]}\u201d wordt in deze versie nog niet verwerkt (alleen meerkeuze).`);
+      q._valid=false;q._unsupported=true;return;
+    }
+    const c=q.opts.filter(o=>o.correct).length;
+    if(c===0)bad(`${tag}: geen correct antwoord gemarkeerd met *.`);
+    else if(c>1)warn(`${tag}: meerdere antwoorden gemarkeerd — alleen het eerste telt.`);
+    if(q.opts.length<2)warn(`${tag}: minder dan 2 antwoordopties.`);
+  });
+  return issues;
+}
+
+/* QTI generation */
+let _idc=0;function nid(p){_idc++;return p+_idc+"x"+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function escX(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function matHtml(t){return `<material><mattext texttype="text/html">${escX("<p>"+esc(t)+"</p>")}</mattext></material>`;}
+function matPlain(t){return `<material><mattext texttype="text/plain">${escX(t)}</mattext></material>`;}
+const OUTCOMES=`<outcomes><decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/></outcomes>`;
+function metaItem(qtype,extra){let f=`<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>${qtype}</fieldentry></qtimetadatafield><qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1.0</fieldentry></qtimetadatafield>`;if(extra)f+=extra;return `<itemmetadata><qtimetadata>${f}</qtimetadata></itemmetadata>`;}
+function buildItem(q,idx){
+  const itemId=nid("i"),R="response1",title=`Question ${idx+1}`;
+  if(q.type==="multiple_choice"||q.type==="true_false"){
+    const ans=q.opts.map(o=>({id:nid("a"),text:o.text,correct:o.correct}));const correct=ans.find(a=>a.correct)||ans[0];
+    const qtype=q.type==="true_false"?"true_false_question":"multiple_choice_question";
+    const labels=ans.map(a=>`<response_label ident="${a.id}">${matPlain(a.text)}</response_label>`).join("");
+    return `<item ident="${itemId}" title="${escX(title)}">${metaItem(qtype,`<qtimetadatafield><fieldlabel>original_answer_ids</fieldlabel><fieldentry>${ans.map(a=>a.id).join(",")}</fieldentry></qtimetadatafield>`)}<presentation>${matHtml(q.text)}<response_lid ident="${R}" rcardinality="Single"><render_choice>${labels}</render_choice></response_lid></presentation><resprocessing>${OUTCOMES}<respcondition continue="No"><conditionvar><varequal respident="${R}">${correct.id}</varequal></conditionvar><setvar action="Set" varname="SCORE">100</setvar></respcondition></resprocessing></item>`;
+  }
+  if(q.type==="multiple_answers"){
+    const ans=q.opts.map(o=>({id:nid("a"),text:o.text,correct:o.correct}));
+    const labels=ans.map(a=>`<response_label ident="${a.id}">${matPlain(a.text)}</response_label>`).join("");
+    const cond=ans.map(a=>a.correct?`<varequal respident="${R}">${a.id}</varequal>`:`<not><varequal respident="${R}">${a.id}</varequal></not>`).join("");
+    return `<item ident="${itemId}" title="${escX(title)}">${metaItem("multiple_answers_question",`<qtimetadatafield><fieldlabel>original_answer_ids</fieldlabel><fieldentry>${ans.map(a=>a.id).join(",")}</fieldentry></qtimetadatafield>`)}<presentation>${matHtml(q.text)}<response_lid ident="${R}" rcardinality="Multiple"><render_choice>${labels}</render_choice></response_lid></presentation><resprocessing>${OUTCOMES}<respcondition continue="No"><conditionvar><and>${cond}</and></conditionvar><setvar action="Set" varname="SCORE">100</setvar></respcondition></resprocessing></item>`;
+  }
+  if(q.type==="short_answer"){
+    const conds=q.answers.map(a=>`<respcondition continue="No"><conditionvar><varequal respident="${R}">${escX(a)}</varequal></conditionvar><setvar action="Set" varname="SCORE">100</setvar></respcondition>`).join("");
+    return `<item ident="${itemId}" title="${escX(title)}">${metaItem("short_answer_question")}<presentation>${matHtml(q.text)}<response_str ident="${R}" rcardinality="Single"><render_fib><response_label ident="${nid("a")}"/></render_fib></response_str></presentation><resprocessing>${OUTCOMES}${conds}</resprocessing></item>`;
+  }
+  if(q.type==="numerical"){
+    const n=parseNumeric(q.numeric);let cond="";
+    if(!n.error){const parts=[];if(n.kind!=="range")parts.push(`<varequal respident="${R}">${n.exact}</varequal>`);parts.push(`<and><vargte respident="${R}">${n.min}</vargte><varlte respident="${R}">${n.max}</varlte></and>`);cond=`<or>${parts.join("")}</or>`;}else cond=`<other/>`;
+    return `<item ident="${itemId}" title="${escX(title)}">${metaItem("numerical_question")}<presentation>${matHtml(q.text)}<response_str ident="${R}" rcardinality="Single"><render_fib fibtype="Decimal"><response_label ident="${nid("a")}"/></render_fib></response_str></presentation><resprocessing>${OUTCOMES}<respcondition continue="No"><conditionvar>${cond}</conditionvar><setvar action="Set" varname="SCORE">100</setvar></respcondition></resprocessing></item>`;
+  }
+  const qtype=q.type==="file_upload"?"file_upload_question":"essay_question";
+  return `<item ident="${itemId}" title="${escX(title)}">${metaItem(qtype)}<presentation>${matHtml(q.text)}<response_str ident="${R}" rcardinality="Single"><render_fib><response_label ident="${nid("a")}"/></render_fib></response_str></presentation><resprocessing>${OUTCOMES}<respcondition continue="No"><conditionvar><other/></conditionvar></respcondition></resprocessing></item>`;
+}
+function buildAssessmentXML(quiz,aid){
+  const items=quiz.questions.map((q,i)=>buildItem(q,i)).join("");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/ims_qtiasiv1p2 http://www.imsglobal.org/xsd/ims_qtiasiv1p2p1.xsd">
+  <assessment ident="${aid}" title="${escX(quiz.title||"Toets")}">
+    <qtimetadata><qtimetadatafield><fieldlabel>cc_maxattempts</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield></qtimetadata>
+    <section ident="root_section">${items}</section>
+  </assessment>
+</questestinterop>`;
+}
+function buildMetaXML(quiz,aid){
+  const total=quiz.questions.length;const desc="<p>"+esc(quiz.description||"")+"</p>";
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<quiz identifier="${aid}" xmlns="http://canvas.instructure.com/xsd/cccv1p0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://canvas.instructure.com/xsd/cccv1p0 https://canvas.instructure.com/xsd/cccv1p0.xsd">
+  <title>${escX(quiz.title||"Toets")}</title>
+  <description>${escX(desc)}</description>
+  <shuffle_answers>false</shuffle_answers>
+  <scoring_policy>keep_highest</scoring_policy>
+  <hide_results></hide_results>
+  <quiz_type>assignment</quiz_type>
+  <points_possible>${total}.0</points_possible>
+  <allowed_attempts>1</allowed_attempts>
+  <one_question_at_a_time>false</one_question_at_a_time>
+  <cant_go_back>false</cant_go_back>
+  <show_correct_answers>true</show_correct_answers>
+  <available>false</available>
+  <assignment identifier="${aid}_assignment">
+    <title>${escX(quiz.title||"Toets")}</title>
+    <due_at/><lock_at/><unlock_at/>
+    <workflow_state>unpublished</workflow_state>
+    <quiz_identifierref>${aid}</quiz_identifierref>
+    <points_possible>${total}.0</points_possible>
+    <grading_type>points</grading_type>
+    <submission_types>online_quiz</submission_types>
+    <position>1</position>
+  </assignment>
+  <assignment_group_identifierref>${aid}_ag</assignment_group_identifierref>
+</quiz>`;
+}
+function buildManifestXML(aid){
+  const manId=nid("M");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="${manId}" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1" xmlns:lom="http://ltsc.ieee.org/xsd/imsccv1p1/LOM/resource" xmlns:imsmd="http://www.imsglobal.org/xsd/imsmd_v1p2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/imscp_v1p1.xsd http://www.imsglobal.org/xsd/imsmd_v1p2 http://www.imsglobal.org/xsd/imsmd_v1p2p2.xsd http://ltsc.ieee.org/xsd/imsccv1p1/LOM/resource http://www.imsglobal.org/profile/cc/ccv1p1/LOM/ccv1p1_lomresource_v1p0.xsd">
+  <metadata><schema>IMS Content</schema><schemaversion>1.1.3</schemaversion></metadata>
+  <organizations/>
+  <resources>
+    <resource identifier="${aid}" type="imsqti_xmlv1p2" href="${aid}/${aid}.xml"><file href="${aid}/${aid}.xml"/><dependency identifierref="${aid}_meta"/></resource>
+    <resource identifier="${aid}_meta" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" href="${aid}/assessment_meta.xml"><file href="${aid}/assessment_meta.xml"/></resource>
+  </resources>
+</manifest>`;
+}
+function crc32(b){let c=0^(-1);for(let i=0;i<b.length;i++){let x=(c^b[i])&0xff;for(let k=0;k<8;k++)x=x&1?(0xEDB88320^(x>>>1)):(x>>>1);c=(c>>>8)^x;}return (c^(-1))>>>0;}
+function makeZip(files){
+  const enc=new TextEncoder(),u16=n=>[n&255,(n>>8)&255],u32=n=>[n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255];
+  const local=[],central=[];let off=0;
+  files.forEach(f=>{
+    const name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data),sz=data.length;
+    const lh=[].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(sz),u32(sz),u16(name.length),u16(0));
+    const lb=new Uint8Array(lh.length+name.length+sz);lb.set(lh,0);lb.set(name,lh.length);lb.set(data,lh.length+name.length);local.push(lb);
+    const cd=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(sz),u32(sz),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off));
+    const cb=new Uint8Array(cd.length+name.length);cb.set(cd,0);cb.set(name,cd.length);central.push(cb);off+=lb.length;
+  });
+  const csize=central.reduce((a,c)=>a+c.length,0);
+  const eo=new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(csize),u32(off),u16(0)));
+  return new Blob([...local,...central,eo],{type:"application/zip"});
+}
+function slug(s){return (s||"toets").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"toets";}
+function serializeQuiz(quiz){
+  let s=`Quiz title: ${quiz.title||"Toets"}\nQuiz description: ${quiz.description||""}\n\n`;
+  quiz.questions.forEach((q,i)=>{
+    s+=`${i+1}. ${q.text}\n`;
+    if(q.type==="multiple_choice"||q.type==="true_false")q.opts.forEach((o,oi)=>s+=`${o.correct?"*":""}${String.fromCharCode(97+oi)}) ${o.text}\n`);
+    else if(q.type==="multiple_answers")q.opts.forEach(o=>s+=`[${o.correct?"*":" "}] ${o.text}\n`);
+    else if(q.type==="numerical")s+=`= ${q.numeric}\n`;
+    else if(q.type==="short_answer")q.answers.forEach(a=>s+=`* ${a}\n`);
+    else if(q.type==="essay")s+=`____\n`;
+    else if(q.type==="file_upload")s+=`^^^^\n`;
+    s+="\n";
+  });
+  return s.trimEnd()+"\n";
+}
+
+/* ====================== UI ====================== */
+const $=s=>document.querySelector(s);
+const src=$("#src"),resBody=$("#resBody"),vBadge=$("#vBadge");
+const state={quiz:null};
+
+function typeCountsStr(quiz){
+  const c={};quiz.questions.forEach(q=>c[q.type]=(c[q.type]||0)+1);
+  return Object.keys(c).map(t=>`<span class="typetag" style="background:${TYPE_COLOR[t][0]};color:${TYPE_COLOR[t][1]}">${TYPE_LABEL[t]} ${c[t]}</span>`).join("");
+}
+let t=null;
+function onInput(){ clearTimeout(t); t=setTimeout(render,140); const n=src.value.trim()?src.value.split(/\n/).length:0; $("#srcStat").textContent=src.value.trim()?`${n} regels`:""; }
+function render(){
+  const text=src.value;
+  if(!text.trim()){ state.quiz=null; vBadge.className="vbadge"; showEmpty(); return; }
+  const quiz=parseQuiz(text); const issues=validate(quiz); state.quiz=quiz;
+  const errs=issues.filter(i=>i.lvl==="err").length;
+  const mcValid=quiz.questions.filter(q=>q.type==="multiple_choice"&&q._valid).length;
+  if(quiz.questions.length){
+    if(!mcValid){ vBadge.className="vbadge bad"; vBadge.innerHTML="✕ geen geldige meerkeuze"; }
+    else if(errs){ vBadge.className="vbadge bad"; vBadge.innerHTML=`✕ ${errs} aandachtspunt${errs>1?"en":""}`; }
+    else { vBadge.className="vbadge ok"; vBadge.innerHTML=`✓ klaar voor Canvas`; }
+  } else vBadge.className="vbadge";
+  renderResult(quiz,issues);
+}
+function showEmpty(){
+  resBody.innerHTML=`<div class="empty">
+    <div class="ill">✦</div>
+    <h3>Hier verschijnt je toets</h3>
+    <p>Plak links je vragen in de Canvas-opmaak. Je ziet ze meteen netjes terug, inclusief controle — daarna download je het QTI-bestand.</p>
+    <button class="demo-b" id="emptyEx">📋 Laad een voorbeeld</button>
+  </div>`;
+  $("#emptyEx").addEventListener("click",()=>loadExample("mcAlg"));
+}
+function renderResult(quiz,issues){
+  let html="";
+  const mcValid=quiz.questions.filter(q=>q.type==="multiple_choice"&&q._valid);
+  const skipped=quiz.questions.filter(q=>q._unsupported).length;
+  if(quiz.title) html+=`<div class="qtitle">${esc(quiz.title)}</div>`;
+  if(quiz.description) html+=`<div class="qdesc">${esc(quiz.description)}</div>`;
+  html+=`<div class="ov-meta"><span class="tcount">${mcValid.length} meerkeuze${mcValid.length===1?"vraag":"vragen"}</span>${skipped?`<span class="typetag" style="background:var(--paper-2);color:var(--muted)">${skipped} overgeslagen</span>`:""}</div>`;
+  const probs=issues.filter(i=>i.lvl==="err"||i.lvl==="warn");
+  const hasErr=issues.some(i=>i.lvl==="err");
+  if(probs.length){
+    html+=`<div class="warns ${hasErr?"errs":""}"><div class="wh">${hasErr?"Nakijken voor import":"Tips"}</div>`+probs.map(p=>`<div class="warnline ${p.lvl}">${p.lvl==="err"?"✕":"!"}&nbsp;<span>${esc(p.msg)}</span></div>`).join("")+`</div>`;
+  }
+  if(!quiz.questions.length){
+    html+=`<div class="ansline" style="background:var(--paper-2)"><span class="val" style="color:var(--ink-soft);font-weight:500">Nog geen vragen herkend — controleer de opmaak (zie 📑 Opmaakregels).</span></div>`;
+  }
+  quiz.questions.forEach((q,i)=>{
+    if(q._unsupported){
+      html+=`<div class="qc locked">
+        <div class="qc-h"><span class="qn">${i+1}</span><span class="qtype" style="background:var(--paper-2);color:var(--muted)">🔒 ${TYPE_LABEL[q.type]}</span><span class="qstatus bad">niet in deze versie</span></div>
+        <div class="qc-b"><div class="qtext" style="color:var(--muted)">${esc(q.text)||"(geen vraagtekst)"}</div>
+        <div class="ansline" style="background:var(--paper-2)"><span class="val" style="color:var(--ink-soft);font-weight:500">Deze versie verwerkt alleen meerkeuze. Dit vraagtype voegen we op verzoek toe.</span></div></div></div>`;
+      return;
+    }
+    const [bg,fg]=TYPE_COLOR[q.type]||TYPE_COLOR.unknown;
+    html+=`<div class="qc ${q._valid?"":"invalid"}" style="animation-delay:${Math.min(i*35,350)}ms">
+      <div class="qc-h"><span class="qn">${i+1}</span><span class="qtype" style="background:${bg};color:${fg}">${TYPE_LABEL[q.type]}</span><span class="qstatus ${q._valid?"ok":"bad"}">${q._valid?"✓":"✕ nakijken"}</span></div>
+      <div class="qc-b"><div class="qtext">${esc(q.text)||'<span style="color:var(--red)">(geen vraagtekst)</span>'}</div>`;
+    if(q.type==="multiple_choice"||q.type==="true_false"){
+      html+=`<ul class="opts">`+q.opts.map(o=>`<li class="radio ${o.correct?"cor":""}"><span class="ob">✓</span>${esc(o.text)}</li>`).join("")+`</ul>`;
+    }else if(q.type==="multiple_answers"){
+      html+=`<ul class="opts">`+q.opts.map(o=>`<li class="${o.correct?"cor":""}"><span class="ob">✓</span>${esc(o.text)}</li>`).join("")+`</ul>`;
+    }else if(q.type==="numerical"){
+      const n=parseNumeric(q.numeric);
+      html+=`<div class="ansline"><span class="lbl">Antwoord</span><span class="val">${n.error?'<span style="color:var(--red)">onleesbaar</span>':n.kind==="range"?`tussen ${n.min} en ${n.max}`:n.kind==="tol"?`${n.exact} (± ${n.margin})`:`${n.exact}`}</span></div>`;
+    }else if(q.type==="short_answer"){
+      html+=`<div class="ansline"><span class="lbl">Goed</span><span class="val">${q.answers.map(esc).join("  ·  ")}</span></div>`;
+    }else if(q.type==="essay"){
+      html+=`<div class="ansline muted"><span class="lbl">✎</span><span class="val">Open essay-antwoord · handmatig nakijken</span></div>`;
+    }else if(q.type==="file_upload"){
+      html+=`<div class="ansline muted"><span class="lbl">⬆</span><span class="val">Bestandsupload · handmatig nakijken</span></div>`;
+    }else{
+      html+=`<div class="ansline" style="background:var(--red-soft)"><span class="val" style="color:var(--red)">Geen antwoordformaat herkend</span></div>`;
+    }
+    html+=`</div></div>`;
+  });
+  const ready=mcValid.length>0;
+  html+=`<div class="export">
+    <h3>📦 Exporteren naar Canvas</h3>
+    <p>Download het QTI-bestand met je ${mcValid.length} meerkeuze${mcValid.length===1?"vraag":"vragen"} (1 punt per vraag) of de nette text2qti-tekst.</p>
+    <div class="row">
+      <button class="dl-zip" id="dlZip" ${ready?"":"disabled"}>⬇ Download QTI-zip</button>
+      <button class="dl-txt" id="dlTxt" ${ready?"":"disabled"}>⬇ Nette .txt</button>
+    </div>
+    <details class="howto"><summary><span class="tw">▸</span> Hoe importeer ik dit in Canvas?</summary>
+      <ol>
+        <li>Open je cursus → <code>Instellingen</code> (Settings).</li>
+        <li>Klik rechts op <code>Cursusinhoud importeren</code> (Import Course Content).</li>
+        <li>Inhoudstype: kies <code>QTI .zip-bestand</code>.</li>
+        <li>Selecteer het gedownloade bestand en klik <code>Importeren</code>.</li>
+        <li>De vragen verschijnen als nieuwe toets / in een vragenbank.</li>
+      </ol>
+    </details>
+  </div>`;
+  resBody.innerHTML=html;
+  if(ready){ $("#dlZip").addEventListener("click",buildAndDownload); $("#dlTxt").addEventListener("click",downloadTxt); }
+}
+function mcSubset(quiz){ return {title:quiz.title,description:quiz.description,questions:quiz.questions.filter(q=>q.type==="multiple_choice"&&q._valid)}; }
+function buildAndDownload(){
+  const quiz=mcSubset(state.quiz||{questions:[]}); if(!quiz.questions.length){ toast("Geen geldige meerkeuzevragen om te exporteren","bad"); return; }
+  _idc=0; const aid=nid("g")+"quiz";
+  const zip=makeZip([
+    {name:"imsmanifest.xml",data:buildManifestXML(aid)},
+    {name:`${aid}/${aid}.xml`,data:buildAssessmentXML(quiz,aid)},
+    {name:`${aid}/assessment_meta.xml`,data:buildMetaXML(quiz,aid)}
+  ]);
+  const a=document.createElement("a");a.href=URL.createObjectURL(zip);a.download=`${slug(quiz.title)}-qti.zip`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  toast("QTI-zip gedownload","ok");
+}
+function downloadTxt(){
+  const quiz=mcSubset(state.quiz||{questions:[]}); if(!quiz.questions.length) return;
+  const blob=new Blob([serializeQuiz(quiz)],{type:"text/plain"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${slug(quiz.title)}.txt`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  toast("Nette tekst gedownload","ok");
+}
+function loadExample(k){ src.value=EXAMPLES[k]; onInput(); render(); $("#exMenu").classList.remove("show"); toast("Voorbeeld geladen","ok"); }
+
+/* wiring */
+src.addEventListener("input",onInput);
+$("#clearBtn").addEventListener("click",()=>{ src.value=""; onInput(); render(); src.focus(); });
+$("#exBtn").addEventListener("click",e=>{ e.stopPropagation(); $("#exMenu").classList.toggle("show"); });
+$("#exMenu").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>loadExample(b.dataset.ex)));
+document.addEventListener("click",e=>{ if(!e.target.closest(".ex-wrap")) $("#exMenu").classList.remove("show"); });
+
+/* rules modal */
+$("#rulesPre").textContent=RULES;
+function openRules(){ $("#rulesMask").classList.add("show"); }
+$("#rulesBtn").addEventListener("click",openRules);
+$("#rulesBtn2").addEventListener("click",openRules);
+$("#rulesBtn3").addEventListener("click",openRules);
+$("#rulesX").addEventListener("click",()=>$("#rulesMask").classList.remove("show"));
+$("#rulesMask").addEventListener("mousedown",e=>{ if(e.target===$("#rulesMask")) $("#rulesMask").classList.remove("show"); });
+$("#rulesCopy").addEventListener("click",()=>{ navigator.clipboard.writeText(RULES).then(()=>toast("Regels gekopieerd","ok")).catch(()=>toast("Kopiëren lukte niet","bad")); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") $("#rulesMask").classList.remove("show"); });
+
+/* toast */
+let toastT=null;
+function toast(msg,kind){ const el=$("#toast"); el.innerHTML=(kind==="bad"?'<span style="color:#ff9a8a">✕</span>':'<span class="tk">✓</span>')+esc(msg); el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2600); }
+
+/* init */
+showEmpty();
+</script>
+</body>
+</html>
